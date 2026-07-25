@@ -5,7 +5,7 @@ import java.util.Observable;
 
 
 /** The state of a game of 2048.
- *  @author TODO: YOUR NAME HERE
+ *  @author icovo
  */
 public class Model extends Observable {
     /** Current contents of the board. */
@@ -94,6 +94,8 @@ public class Model extends Observable {
         setChanged();
     }
 
+//    public class
+
     /** Tilt the board toward SIDE. Return true iff this changes the board.
      *
      * 1. If two Tile objects are adjacent in the direction of motion and have
@@ -106,6 +108,108 @@ public class Model extends Observable {
      *    value, then the leading two tiles in the direction of motion merge,
      *    and the trailing tile does not.
      * */
+
+    public boolean tileNullJudge (int col, int row) {
+        Tile t = board.tile (col, row);
+        if (t == null) return true;
+        else return false;
+    }
+
+    // 判断两tile能否合并
+    public boolean tileMerge (Tile tile1, Tile tile2) {
+        if (tile1.value() == tile2.value()) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    // 每次合并都需要计算价值
+    public void addScore (Tile t1, Tile t2) {
+        score = score + t1.value() + t2.value();
+    }
+
+    public int max (int x, int y) {
+        return x > y ? x : y;
+    }
+
+
+    // 找每一行看能否找到相邻的看能否合并, 我们每次找完一行都会移动
+    public int handleRow (int col, int row, int highLim) {
+        for (int newr = row + 1; newr <= highLim; newr ++) {
+            if (tileNullJudge(col, newr)) continue;
+            else {
+                Tile pas = board.tile (col, row);
+                Tile aft = board.tile (col, newr);
+                if (tileMerge(pas, aft)) {
+                    addScore(pas, aft);
+                    board.move (col, newr, pas);
+                    highLim = max (newr - 1, 0);
+                } else {
+                    // 边界问题?
+                    board.move (col, newr - 1, pas);
+                    highLim = max (newr - 1, 0);
+                }
+
+                return highLim;
+            }
+        }
+
+        Tile t = board.tile (col, row);
+        if (row != highLim) {
+            board.move (col, highLim, t);
+            return -1;
+        } else {
+            return highLim;
+        }
+    }
+
+    // 处理列, 并且需要知道是否真的操作过. 注意需要定义一个上线代表合并查找的范围hignLim, 可以对比每次hignLim是否变化判断是否操作过
+    public boolean handleCol (int col) {
+        int hignLim = board.size() - 1;
+
+        boolean changed = false;
+
+        for (int row = board.size() - 2; row >= 0; row--) {
+            if (tileNullJudge(col, row)) continue;
+
+            int newhignLim = handleRow (col, row, hignLim);
+            if (newhignLim == -1) {
+                changed = true;
+            } else if (newhignLim != hignLim) {
+                changed = true;
+                hignLim = newhignLim;
+            }
+        }
+
+        return changed;
+    }
+
+//    public boolean moveToEmpty (int col, int row) {
+//        Tile t = board.tile(col, row);
+//        for (int findr = board.size() - 1; findr >= row + 1; findr --) {
+//            if (tileNullJudge(col, findr)) {
+//                board.move(col, findr, t);
+//                return true;
+//            }
+//        }
+//
+//        return false;
+//    }
+
+//    public boolean CheckFinal (int col) {
+//        boolean changed = false;
+//        for (int nowr = board.size() - 1; nowr >= 0; nowr --) {
+//            if (tileNullJudge(col, nowr)) continue;
+//
+//            if (moveToEmpty(col, nowr)) {
+//                changed = true;
+//            }
+//        }
+//
+//        return changed;
+//    }
+
     public boolean tilt(Side side) {
         boolean changed;
         changed = false;
@@ -113,6 +217,21 @@ public class Model extends Observable {
         // TODO: Modify this.board (and perhaps this.score) to account
         // for the tilt to the Side SIDE. If the board changed, set the
         // changed local variable to true.
+
+        board.setViewingPerspective(side);
+        for (int col = 0; col < board.size(); col ++) {
+            if (handleCol(col)) {
+                changed = true;
+            }
+        }
+
+        board.setViewingPerspective(Side.NORTH);
+
+//        for (int col = 0; col < board.size(); col ++) {
+//            if (CheckFinal(col)) {
+//                changed = true;
+//            }
+//        }
 
         checkGameOver();
         if (changed) {
@@ -138,6 +257,12 @@ public class Model extends Observable {
      * */
     public static boolean emptySpaceExists(Board b) {
         // TODO: Fill in this function.
+        for (int i = 0; i < b.size(); i ++) {
+            for (int j = 0; j < b.size(); j ++) {
+                Tile t = b.tile(i, j);
+                if (t == null) return true;
+            }
+        }
         return false;
     }
 
@@ -148,6 +273,15 @@ public class Model extends Observable {
      */
     public static boolean maxTileExists(Board b) {
         // TODO: Fill in this function.
+        for (int i = 0; i < b.size(); i ++) {
+            for (int j = 0; j < b.size(); j ++) {
+                Tile t = b.tile (i, j);
+                if (t == null) {
+                    continue;
+                }
+                if (t.value() == MAX_PIECE) return true;
+            }
+        }
         return false;
     }
 
@@ -159,6 +293,32 @@ public class Model extends Observable {
      */
     public static boolean atLeastOneMoveExists(Board b) {
         // TODO: Fill in this function.
+        for (int i = 0; i < b.size(); i ++) {
+            for (int j = 0; j < b.size(); j ++) {
+                Tile t = b.tile (i, j);
+                if (t == null) return true;
+            }
+        }
+
+        int[] dx = {0, 0, 1, -1};
+        int[] dy = {1, -1, 0, 0};
+        for (int i = 0; i < b.size(); i ++) {
+            for (int j = 0; j < b.size(); j ++) {
+                for (int k1 = 0; k1 < 4; k1 ++) {
+                    int nx = i + dx[k1];
+                    int ny = j + dy[k1];
+
+                    if (nx >= 0 && nx < b.size() && ny >= 0 && ny < b.size()) {
+                        Tile near = b.tile (nx, ny);
+                        Tile now = b.tile (i, j);
+
+                        if (near.value() == now.value()) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
         return false;
     }
 
