@@ -13,7 +13,7 @@ public class TestMaxTileExists {
     static Board b;
 
     @Test
-    /** Note that this isn't a possible board state. */
+    /** Note that this isn't a possible board stvate. */
     public void testEmptyBoard() {
         int[][] rawVals = new int[][] {
                 {0, 0, 0, 0},

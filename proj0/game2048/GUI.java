@@ -54,10 +54,27 @@ class GUI extends TopLevel implements Observer {
         _widget.requestFocusInWindow();
     }
 
-    /** Respond to the user pressing key E by queuing the key on our
-     *  queue of pending keys.*/
+    /** Respond to a key press by queuing a locale-independent command. */
     public void keyPressed(String unused, KeyEvent e) {
-        _pendingKeys.offer(e.getKeyText(e.getKeyCode()));
+        String command;
+        switch (e.getKeyCode()) {
+            case KeyEvent.VK_UP:
+                command = "Up";
+                break;
+            case KeyEvent.VK_RIGHT:
+                command = "Right";
+                break;
+            case KeyEvent.VK_DOWN:
+                command = "Down";
+                break;
+            case KeyEvent.VK_LEFT:
+                command = "Left";
+                break;
+            default:
+                command = KeyEvent.getKeyText(e.getKeyCode());
+                break;
+        }
+        _pendingKeys.offer(command);
     }
 
     /** Return the next pending event, waiting for it as necessary.
