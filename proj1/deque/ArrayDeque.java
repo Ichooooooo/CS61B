@@ -1,15 +1,15 @@
 package deque;
 
-public class ArrayDeque <T> implements Deque<T> {
+public class ArrayDeque<T> implements Deque<T> {
     private int size = 0;
-    private T [] p;
+    private T[] p;
     private int SIZE = 8;
     private int back, front;
-    private double RFACTOR = 1.5;
-    private int SMALLSIZE = 30; // small size not need R >= 0.25
+    private static double RFACTOR = 1.5;
+    private static int SMALLSIZE = 30; // small size not need R >= 0.25
 
-    public ArrayDeque () {
-        p = (T []) new Object[8];
+    public ArrayDeque() {
+        p = (T[]) new Object[8];
         back = SIZE - 1;
         front = 0;
     }
@@ -17,7 +17,7 @@ public class ArrayDeque <T> implements Deque<T> {
     private void expandSize () {
         if (back >= front) {
             int TSIZE = (int) ((int) SIZE * RFACTOR);
-            T[] t = (T []) new Object[TSIZE];
+            T[] t = (T[]) new Object[TSIZE];
             System.arraycopy(p, 0, t, 0, front);
             int length = SIZE - 1 - back;
             int tback = TSIZE - 1 - length;
@@ -73,6 +73,7 @@ public class ArrayDeque <T> implements Deque<T> {
         return (t + SIZE) % SIZE;
     }
 
+    @Override
     public void addFirst (T item) {
         if (size == SIZE - 1) {
             expandSize();
@@ -82,6 +83,7 @@ public class ArrayDeque <T> implements Deque<T> {
         size++;
     }
 
+    @Override
     public void addLast (T item) {
         if (size == SIZE - 1) {
             expandSize();
@@ -91,10 +93,12 @@ public class ArrayDeque <T> implements Deque<T> {
         size++;
     }
 
+    @Override
     public int size () {
         return size;
     }
 
+    @Override
     public void printDeque () {
         if (size == 0) {
             System.out.println("");
@@ -114,6 +118,7 @@ public class ArrayDeque <T> implements Deque<T> {
         System.out.println("");
     }
 
+    @Override
     public T removeFirst () {
         if (size == 0) { return null;}
 
@@ -128,6 +133,7 @@ public class ArrayDeque <T> implements Deque<T> {
         return ans;
     }
 
+    @Override
     public T removeLast () {
         if (size == 0) { return null;}
 
@@ -142,6 +148,7 @@ public class ArrayDeque <T> implements Deque<T> {
         return ans;
     }
 
+    @Override
     public T get (int index) {
         return p[index(back + 1 + index)];
     }
