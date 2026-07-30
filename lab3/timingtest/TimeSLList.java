@@ -27,20 +27,25 @@ public class TimeSLList {
         AList<Integer> Ns = new AList<>();
         AList<Double> times = new AList<>();
         AList<Integer> opCounts = new AList<>();
-        int origin = 1000;
-        for (int i = 1; i <= 8; i++) {
-            Ns.addLast(origin);
-            opCounts.addLast(origin);
 
-            edu.princeton.cs.introcs.Stopwatch sw = new Stopwatch();
+        int N = 1000;
+        int M = 10000;
+        for (int i = 1; i <= 8; i++) {
+            Ns.addLast(N);
+            opCounts.addLast(M);
+
             SLList<Integer> t = new SLList<>();
-            for (int j = 0; j < origin; j++) {
+            for (int j = 0; j < N; j++) {
                 t.addLast(i);
+            }
+            edu.princeton.cs.introcs.Stopwatch sw = new Stopwatch();
+            for (int j = 0; j < M; j++) {
+                t.getLast();
             }
             double timeInSeconds = sw.elapsedTime();
             times.addLast(timeInSeconds);
 
-            origin *= 2;
+            N *= 2;
         }
 
         printTimingTable(Ns, times, opCounts);
