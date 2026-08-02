@@ -1,6 +1,8 @@
 package deque;
 
-public class LinkedListDeque <T> implements Deque<T> {
+import java.util.Iterator;
+
+public class LinkedListDeque <T> implements Deque<T>, Iterable<T> {
     public static class IntNode <T> {
         public IntNode prev;
         public T item;
@@ -53,14 +55,7 @@ public class LinkedListDeque <T> implements Deque<T> {
 
     @Override
     public void printDeque () {
-        IntNode p = sentinel;
-
-        p = p.next;
-        while (p != sentinel) {
-            System.out.print (p.item + " ");
-            p = p.next;
-        }
-        System.out.println("");
+        System.out.println(toString());
     }
 
     @Override
@@ -104,11 +99,61 @@ public class LinkedListDeque <T> implements Deque<T> {
         return (T) p.item;
     }
 
-//    public Iterator<T> iterator() {
-//
-//    }
-//
-//    public boolean equals (Object o) {
-//
-//    }
+    public Iterator<T> iterator() {
+        return new LinkedListDequeIterator();
+    }
+
+    private class LinkedListDequeIterator implements Iterator<T> {
+        private int num;
+        private IntNode p = sentinel;
+
+        LinkedListDequeIterator() {
+            num = 0;
+        }
+
+        public boolean hasNext() {
+            return num < size;
+        }
+
+        public T next() {
+            p = p.next;
+            T returnNum = (T) p.item;
+            num++;
+
+            return returnNum;
+        }
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder returnSB = new StringBuilder();
+
+        if (size == 0) {
+            return returnSB.toString();
+        }
+
+        IntNode p = sentinel;
+        p = p.next;
+        while (p != sentinel) {
+            System.out.print (p.item + " ");
+            p = p.next;
+        }
+
+        return returnSB.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) return true;
+        if (!(o instanceof  LinkedListDeque)) return false;
+
+        LinkedListDeque<T> q = (LinkedListDeque<T>) o;
+        if (q.size() != size) return false;
+
+        for (int i = 0; i < size; i++) {
+            if (this.get(i) != q.get(i)) return false;
+        }
+
+        return true;
+    }
 }

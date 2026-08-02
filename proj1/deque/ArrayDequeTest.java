@@ -1,10 +1,7 @@
 package deque;
 
-import org.checkerframework.checker.units.qual.A;
+import edu.princeton.cs.algs4.StdRandom;
 import org.junit.Test;
-
-import java.lang.reflect.Array;
-import java.util.LinkedList;
 
 import static org.junit.Assert.*;
 
@@ -115,4 +112,82 @@ public class ArrayDequeTest {
 
         p.printDeque();
     }
+
+    @Test
+    /** test the iterator */
+    public void testIterator() {
+        ArrayDeque<Integer> p = new ArrayDeque<>();
+        p.addLast(1);
+        p.addLast(2);
+        p.addLast(3);
+        p.addLast(4);
+
+        int t = 1;
+        for (int x : p) {
+            assertEquals(t, x);
+            t++;
+        }
+    }
+
+    @Test
+    /**test the equals */
+    public void testEquals() {
+        ArrayDeque<Integer> p = new ArrayDeque<>();
+        ArrayDeque<Integer> q = new ArrayDeque<>();
+        ArrayDeque<Integer> g = new ArrayDeque<>();
+
+        p.addLast(1);
+        p.addLast(2);
+        p.addLast(3);
+        q.addLast(1);
+        q.addLast(2);
+        q.addLast(3);
+        g.addLast(3);
+        g.addLast(3);
+        g.addLast(3);
+
+        assertTrue(p.equals(q));
+        assertTrue(q.equals(p));
+        assertTrue(!q.equals(g));
+        assertTrue(!p.equals(g));
+    }
+
+    @Test
+    /** random test */
+    public void randomTest() {
+        int N = 5000;
+        java.util.Deque<Integer> expected = new java.util.ArrayDeque<>();
+        ArrayDeque<Integer> test = new ArrayDeque<>();
+
+        for (int testNum = 0; testNum < N; testNum++) {
+            int operatorNumber = StdRandom.uniform(0, 7);
+            if (operatorNumber == 0) {
+                int num = StdRandom.uniform(0, 5);
+                expected.addFirst(num);
+                test.addFirst(num);
+            } else if (operatorNumber == 1) {
+                int num = StdRandom.uniform(0, 5);
+                expected.addLast(num);
+                test.addLast(num);
+            } else if (operatorNumber == 2) {
+                assertEquals(expected.size(), test.size());
+            } else if (operatorNumber == 3) {
+                if (test.size() == 0) continue;
+
+                assertEquals(expected.removeFirst(), test.removeFirst());
+            } else if (operatorNumber == 4) {
+                if (test.size() == 0) continue;
+
+                assertEquals(expected.removeLast(), test.removeLast());
+            } else if (operatorNumber == 5) {
+                if (test.size() == 0) continue;
+
+                int num = StdRandom.uniform(0, test.size());
+                System.out.println("The index of : " + num + " is " + test.get(num));
+            } else {
+                test.printDeque();
+            }
+        }
+    }
 }
+

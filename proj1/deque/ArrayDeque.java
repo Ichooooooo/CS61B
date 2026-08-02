@@ -1,6 +1,8 @@
 package deque;
 
-public class ArrayDeque<T> implements Deque<T> {
+import java.util.Iterator;
+
+public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
     private int size = 0;
     private T[] p;
     private int SIZE = 8;
@@ -100,22 +102,7 @@ public class ArrayDeque<T> implements Deque<T> {
 
     @Override
     public void printDeque () {
-        if (size == 0) {
-            System.out.println("");
-            return;
-        }
-
-        for (int in = back + 1, count = 0; count < size; count++, in++) {
-            if (count != 0) {
-                int t = index(in);
-                System.out.print(" " + p[t]);
-            } else {
-                int t = index(in);
-                System.out.print(p[t]);
-            }
-        }
-
-        System.out.println("");
+        System.out.println(toString());
     }
 
     @Override
@@ -153,11 +140,60 @@ public class ArrayDeque<T> implements Deque<T> {
         return p[index(back + 1 + index)];
     }
 
-//    public Iterator <T> interator() {
-//
-//    }
-//
-//    public boolean equals (Object o) {
-//
-//    }
+    public Iterator<T> iterator() {
+        return new ArrayDequeIterator();
+    }
+
+    private class ArrayDequeIterator implements Iterator<T> {
+        private int num;
+        private int index;
+
+        public ArrayDequeIterator() {
+            num = 0;
+            index = index(back + 1);
+        }
+
+        public boolean hasNext() {
+            return num < size;
+        }
+
+        public T next() {
+            T returnNum = p[index];
+            index = index(index + 1);
+            num++;
+            return returnNum;
+        }
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder returnSB = new StringBuilder();
+        for (int in = back + 1, count = 0; count < size; count++, in++) {
+            if (count != 0) {
+                int t = index(in);
+                returnSB.append(" ");
+                returnSB.append(p[t]);
+            } else {
+                int t = index(in);
+                returnSB.append(p[t]);
+            }
+        }
+
+        return returnSB.toString();
+    }
+
+    @Override
+    public boolean equals (Object o) {
+        if (o == this) return true;
+        if (!(o instanceof ArrayDeque)) return false;
+
+        ArrayDeque<T> q = (ArrayDeque<T>) o;
+        if (size != q.size()) { return false;}
+
+        for (int i = 0; i < size; i++) {
+            if (this.get(i) != q.get(i)) return false;
+        }
+
+        return true;
+    }
 }
