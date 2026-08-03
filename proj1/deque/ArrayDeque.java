@@ -186,13 +186,19 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
     @Override
     public boolean equals (Object o) {
         if (o == this) return true;
-        if (!(o instanceof ArrayDeque)) return false;
+        if (!(o instanceof Deque)) return false;
 
-        ArrayDeque<T> q = (ArrayDeque<T>) o;
-        if (size != q.size()) { return false;}
+        Deque<T> q;
+        if (o instanceof LinkedListDeque) {
+            q = (LinkedListDeque<T>) o;
+        } else {
+            q = (ArrayDeque<T>) o;
+        }
+
+        if (q.size() != size) return false;
 
         for (int i = 0; i < size; i++) {
-            if (!Objects.equals(this.get(i), q.get(i))) return false;
+            if (!this.get(i).equals(q.get(i))) return false;
         }
 
         return true;
