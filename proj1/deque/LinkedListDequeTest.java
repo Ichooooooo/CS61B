@@ -33,7 +33,7 @@ public class LinkedListDequeTest {
 
     @Test
     public void printByGet () {
-        LinkedListDeque <String> test = new LinkedListDeque<>("i");
+        LinkedListDeque <String> test = new LinkedListDeque<>();
         LinkedListDeque <String> expected = new LinkedListDeque<>();
 
         expected.addFirst("i");
@@ -41,6 +41,7 @@ public class LinkedListDequeTest {
         expected.addFirst("you");
         expected.addFirst("always");
 
+        test.addLast("i");
         test.addLast("love");
         test.addLast("you");
         test.addLast("always");

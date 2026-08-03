@@ -5,7 +5,7 @@ import java.util.LinkedList;
 //import java.util.Objects;
 
 public class LinkedListDeque <T> implements Deque<T>, Iterable<T> {
-    public static class IntNode <T> {
+    private static class IntNode <T> {
         public IntNode prev;
         public T item;
         public IntNode next;
@@ -24,14 +24,6 @@ public class LinkedListDeque <T> implements Deque<T>, Iterable<T> {
         sentinel.prev = sentinel;
         sentinel.next = sentinel;
         size = 0;
-    }
-
-    public LinkedListDeque (T item) {
-        sentinel = new IntNode (0, null, null);
-        IntNode t = new IntNode (item, sentinel, sentinel);
-        sentinel.next = t;
-        sentinel.prev = t;
-        size++;
     }
 
     @Override

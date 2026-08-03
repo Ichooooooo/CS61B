@@ -103,7 +103,20 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
 
     @Override
     public void printDeque () {
-        System.out.println(toString());
+        StringBuilder returnSB = new StringBuilder();
+        for (int in = back + 1, count = 0; count < size; count++, in++) {
+            if (count != 0) {
+                int t = index(in);
+                returnSB.append(" ");
+                returnSB.append(p[t]);
+            } else {
+                int t = index(in);
+                returnSB.append(p[t]);
+            }
+        }
+
+        String returnSBString = returnSB.toString();
+        System.out.println(returnSBString);
     }
 
     @Override
@@ -167,33 +180,11 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
     }
 
     @Override
-    public String toString() {
-        StringBuilder returnSB = new StringBuilder();
-        for (int in = back + 1, count = 0; count < size; count++, in++) {
-            if (count != 0) {
-                int t = index(in);
-                returnSB.append(" ");
-                returnSB.append(p[t]);
-            } else {
-                int t = index(in);
-                returnSB.append(p[t]);
-            }
-        }
-
-        return returnSB.toString();
-    }
-
-    @Override
     public boolean equals (Object o) {
         if (o == this) return true;
         if (!(o instanceof Deque)) return false;
 
-        Deque<T> q;
-        if (o instanceof LinkedListDeque) {
-            q = (LinkedListDeque<T>) o;
-        } else {
-            q = (ArrayDeque<T>) o;
-        }
+        Deque<T> q = (Deque<T>) o;
 
         if (q.size() != size) return false;
 
