@@ -66,9 +66,9 @@ class Utils {
     /* FILE DELETION */
 
     /** Deletes FILE if it exists and is not a directory.  Returns true
-     *  if FILE was deleted, and false otherwise.  Refuses to delete FILE
-     *  and throws IllegalArgumentException unless the directory designated by
-     *  FILE also contains a directory named .gitlet. */
+     *      *  if FILE was deleted, and false otherwise.  Refuses to delete FILE
+     *      *  and throws IllegalArgumentException unless the directory designated by
+     *      *  FILE also contains a directory named .gitlet. */
     static boolean restrictedDelete(File file) {
         if (!(new File(file.getParentFile(), ".gitlet")).isDirectory()) {
             throw new IllegalArgumentException("not .gitlet working directory");
@@ -221,12 +221,11 @@ class Utils {
     }
 
 
-
     /* MESSAGES AND ERROR REPORTING */
 
     /** Return a GitletException whose message is composed from MSG and ARGS as
      *  for the String.format method. */
-    static GitletException error(String msg, Object... args) {
+    static GitletException error(String msg, Object... args)  {
         return new GitletException(String.format(msg, args));
     }
 

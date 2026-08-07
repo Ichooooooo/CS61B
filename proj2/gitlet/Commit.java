@@ -1,26 +1,65 @@
 package gitlet;
 
-// TODO: any imports you need here
+import java.io.File;
+import java.io.Serializable;
+import java.util.Date;
+import java.util.HashMap;
 
-import java.util.Date; // TODO: You'll likely use this in this class
+import static gitlet.Repository.getFileSHA1;
+import static gitlet.Utils.*;
 
 /** Represents a gitlet commit object.
- *  TODO: It's a good idea to give a description here of what else this Class
- *  does at a high level.
- *
- *  @author TODO
+ *  @author icovo
  */
-public class Commit {
-    /**
-     * TODO: add instance variables here.
-     *
-     * List all instance variables of the Commit class here with a useful
-     * comment above them describing what that variable represents and how that
-     * variable is used. We've provided one example for `message`.
-     */
+public class Commit implements Serializable {
 
-    /** The message of this Commit. */
+    // The five quality that make SHA1 for Commit
     private String message;
+    private Date timestamp;
+    private HashMap<String, String> trackedFiles = new HashMap<>();
+    private String firstFather;
+    private String secondFather;
+    private String SHA1;
 
-    /* TODO: fill in the rest of this class. */
+    public Commit(String firstFather, String message, Date timestamp) {
+        this.firstFather = firstFather;
+        this.message = message;
+        this.timestamp = timestamp;
+        SHA1 = sha1(serialize(this));
+    }
+
+    public Commit(String message, Commit parent) {
+        this.firstFather = parent.getSHA1();
+        this.message = message;
+        this.timestamp = new Date();
+        this.trackedFiles = new HashMap<>(parent.getTrackedFiles());
+        SHA1 = sha1(serialize(this));
+    }
+
+    // get SHA1
+    public String getSHA1() {
+        return SHA1;
+    }
+
+    public boolean isFileExist(String fileName) {
+        return trackedFiles.containsKey(fileName);
+    }
+
+    public String getFileId(String fileName) {
+        return trackedFiles.get(fileName);
+    }
+
+    public HashMap<String, String> getTrackedFiles() { return trackedFiles; }
+
+    public void addFile(File file) {
+        trackedFiles.put(file.getName(), getFileSHA1(file));
+    }
+
+    public void changeFile(File file) {
+        trackedFiles.replace(file.getName(), getFileSHA1(file));
+    }
+
+    public void removeFile(File file) {
+        trackedFiles.remove(file.getName());
+    }
 }

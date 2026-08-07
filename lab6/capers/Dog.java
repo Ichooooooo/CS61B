@@ -34,7 +34,6 @@ public class Dog implements Serializable { // TODO
 
     /**
      * Reads in and deserializes a dog from a file with name NAME in DOG_FOLDER.
-     *
      * @param name Name of dog to load
      * @return Dog read from file
      */
