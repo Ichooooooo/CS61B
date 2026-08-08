@@ -1,9 +1,7 @@
 package gitlet;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import static gitlet.Utils.*;
 
@@ -17,14 +15,13 @@ import static gitlet.Utils.*;
  */
 public class Repository {
     /**
-     *
-     *
-     * .gitlet/ -- top Folder to storage the information needed for gitlet
-     *    - Commit/ --Stage the Commit class and Named this by their SHA1
+     * .gitlet/ --   top Folder to storage the information needed for gitlet
+     *    - Commit/ --  Stage the Commit class and Named this by their SHA1
      *    - Blob/ --
      *    - Stage/ --
      *          - Addition/  -- The file needed to add
      *          - Remove/  -- The file remove from next Commit
+     *    - HEAD/  --  store the frontest BranchName
      *    - Branch/ --
      */
 
@@ -38,11 +35,10 @@ public class Repository {
     public static final File STAGE_ADDITION_DIR = join(STAGE_DIR, "Addition");
     public static final File STAGE_REMOVE_DIR = join(STAGE_DIR, "Remove");
     public static final File BRANCH_DIR = join(GITLET_DIR, "Branch");
-    /** The HEAD branch */
-    public static Branch HEAD;
+    public static final File HEAD_DIR = join(GITLET_DIR, "HEAD");
 
     /*
-    auxiliary function for all, TODO : pivate or public?
+    auxiliary function for all, set the ways as private
      */
 
     // Persistence function
@@ -63,16 +59,17 @@ public class Repository {
         file.delete();
     }
 
-    // Compare file with file function
+    // get FILE SHA1
     public static String getFileSHA1(File file) {
         return sha1(readContents(file));
     }
 
+    // COMPARE FILE
     private static boolean isFileContentSame(File file1, File file2) {
         return getFileSHA1(file1).equals(getFileSHA1(file2));
     }
 
-    // Copy file
+    // COPY file
     private static void copyFile(File file, File copyfile) {
         byte[] content = readContents(file);
         writeContents(copyfile, content);
@@ -87,23 +84,38 @@ public class Repository {
         return readObject(commitFile, Commit.class);
     }
 
-    // Get file FROM Blob by file SHA1
+    // Get file from BLOB by file SHA1
     private static File getFileFromBLob(String fileSHA1) {
         return join(BLOB_DIR, fileSHA1);
     }
 
-    // Get the HEAD commit
-    private static Commit getHEADCommit() {
-        Branch HEAD = getObjectFromBranch(join(BRANCH_DIR, "HEAD"));
-        Commit commit = getObjectFromCommit(join(COMMIT_DIR, HEAD.getCommitSHA1()));
-        return commit;
+    // Get the frontest branch from HEAD
+    private static String getFrontestBranchName() {
+        return (String)(readContentsAsString(HEAD_DIR));
     }
 
-    // Change the HEAD branch To new Commit, then SETPERSISTENCE
-    private static void moveHEAD(Commit commit) {
-        Branch HEAD = getObjectFromBranch(join(BRANCH_DIR, "HEAD"));
-        HEAD.movePointer(commit.getSHA1());
-        setPersistence(HEAD);
+    // Get the HEAD COMMIT
+    private static Commit getHEADCommit() {
+        Branch frontestBranch = getObjectFromBranch(join(BRANCH_DIR, getFrontestBranchName()));
+        return getObjectFromCommit(join(COMMIT_DIR, frontestBranch.getCommitSHA1()));
+    }
+
+    // MOVE HEAD, Change the HEAD To new Commit, then SETPERSISTENCE
+    private static void moveHEAD(Branch branch) {
+        writeContents(HEAD_DIR, branch.getName());
+    }
+
+    // MOVE Branch to new commit, and move the HEAD to the new branch, then SET PERSISTENCE
+    private static void moveBranchAndHEAD(String branchName, Commit commit) {
+        Branch branch = getObjectFromBranch(join(BRANCH_DIR, branchName));
+        branch.movePointer(commit.getSHA1());
+        setPersistence(branch);
+        moveHEAD(branch);
+    }
+
+    // Get all file name from file dir
+    public static List<String> getAllFileName(File file) {
+        return plainFilenamesIn(file);
     }
 
     /**
@@ -121,6 +133,7 @@ public class Repository {
         STAGE_ADDITION_DIR.mkdir();
         STAGE_REMOVE_DIR.mkdir();
         BRANCH_DIR.mkdir();
+        HEAD_DIR.mkdir();
 
         // set the first commit then PERSIST
         Commit commit = new Commit(null, "initial commit", new Date(0L));
@@ -128,9 +141,8 @@ public class Repository {
 
         // set the branch master and HEAD, then point to the commit, then PERSIST
         Branch master = new Branch("master", commit.getSHA1());
-        HEAD = new Branch("HEAD", commit.getSHA1());
         setPersistence(master);
-        setPersistence(HEAD);
+        writeContents(HEAD_DIR, master.getName());
     }
 
     /**
@@ -154,24 +166,18 @@ public class Repository {
              - readdFileInStage(File file)
      */
 
+    // Judge if file EXIST in STAGE
     private static boolean isFileInStageAdd(File file) {
         File stageAddFile = join(STAGE_ADDITION_DIR, file.getName());
-        if (stageAddFile.exists()) {
-            return true;
-        } else {
-            return false;
-        }
+        return stageAddFile.exists();
     }
 
     private static boolean isFileInStageRem(File file) {
         File stageRemFile = join(STAGE_REMOVE_DIR, file.getName());
-        if (stageRemFile.exists()) {
-            return true;
-        } else {
-            return false;
-        }
+        return stageRemFile.exists();
     }
 
+    // If the file have in STAGE/ADD, you need UPDATE the new content
     private static void updateFileInStage(File file) {
         File stageFile = join(STAGE_ADDITION_DIR, file.getName());
         if (isFileContentSame(stageFile, file)) return;
@@ -179,6 +185,7 @@ public class Repository {
         copyFile(file, stageFile);
     }
 
+    // CREATE new File in STAGE
     private static void storeFileInStageAdd(File file) {
         File stageFile = join(STAGE_ADDITION_DIR, file.getName());
         copyFile(file, stageFile);
@@ -189,7 +196,7 @@ public class Repository {
         writeContents(stageRMFile, "");
     }
 
-    // If file exist then delete else do nothing
+    // If file exist in STAGE then delete else do nothing
     private static void deleteFileInStage(File file) {
         File stageAddFile = join(STAGE_ADDITION_DIR, file.getName());
         File stageRemFile = join(STAGE_REMOVE_DIR, file.getName());
@@ -197,18 +204,21 @@ public class Repository {
         if (stageRemFile.exists()) stageRemFile.delete();
     }
 
+    // Move the file from STAGE/REMOVE to STAGE/ADD
     private static void readdFileInStage(File file) {
         File stageRemoveFile = join(STAGE_REMOVE_DIR, file.getName());
         stageRemoveFile.delete();
         storeFileInStageAdd(file);
     }
 
+    // Move the file from STAGE/ADD to STAGE/REMOVE
     private static void rermFileInStage(File file) {
         File stageAddFile = join(STAGE_ADDITION_DIR, file.getName());
         stageAddFile.delete();
         storeFileInStageRemove(file);
     }
 
+    // Judge if file in COMMIT
     private static boolean isFileInCommit(Commit commit, File file) {
         return commit.isFileExist(file.getName()) && isFileContentSame(file, getFileFromBLob(commit.getFileId(file.getName())));
     }
@@ -237,14 +247,14 @@ public class Repository {
      * Commit Function is Follow
      *  - Init the new Commit
      *  - For each Stage to add or remove file in Commit, and Write the file to BLOB, then DELETE the file
-     *  - Set persist Commit and Remove HEAD, then Set persist HEAD
+     *  - Set persist Commit and Remove branch master, and HEAD point to master, then Set persist branch and HEAD
      *
      * @return boolean to check the error that nothing in Stage
      */
 
     // Add file from STAGE/ADDITION to Commit and then write file to BLOB, finally DELETE file in Stage
     private static boolean addFileFromStageToCommit(Commit commit) {
-        List<String> list = plainFilenamesIn(join(STAGE_ADDITION_DIR));
+        List<String> list = getAllFileName(join(STAGE_ADDITION_DIR));
         if (list.isEmpty()) return false;
 
         for (String fileName : list) {
@@ -261,7 +271,7 @@ public class Repository {
 
     // Remove file in STAGE/REMOVE from Commit and DELETE file in Stage
     private static boolean removeFileFromStageToCommit(Commit commit) {
-        List<String> list = plainFilenamesIn(join(STAGE_REMOVE_DIR));
+        List<String> list = getAllFileName(join(STAGE_REMOVE_DIR));
         if (list.isEmpty()) return false;
 
         for (String fileName : list) {
@@ -279,13 +289,18 @@ public class Repository {
         boolean ok2 = removeFileFromStageToCommit(newCommit);
         if (!(ok1 || ok2)) return false;
         setPersistence(newCommit);
-        moveHEAD(newCommit);
+        moveBranchAndHEAD("master", newCommit);
         return true;
     }
 
     /**
      * RM function as follows :
-     *
+     *  - Check the Commit, if the file have FOLLOWED :
+     *          -- If the file have added then delete it.
+     *          -- Add the file to Stage/Remove.
+     *          -- Delete from workspace.
+     *  - UNFOLLOWED :
+     *          -- If the file have added then delete it.
      */
 
     public static boolean removeFuc(String fileName) {
@@ -306,7 +321,223 @@ public class Repository {
             deleteFileInStage(file);
         }
 
-        if (!(isFileInHEAD || isFileInStage)) return false;
-        return true;
+        return (!(isFileInHEAD || isFileInStage));
+    }
+
+    /**
+     * Log function as follows :
+     *   -  formate the Date
+     *   -  print follow the rule
+     *   -  use the fatherCommit to come back the commit tree
+     */
+
+    private static String formatDate(Date timestamp) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(timestamp);
+
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
+
+        return String.format(
+                Locale.ENGLISH,
+                "%1$ta %1$tb %2$d %1$tT %1$tY %1$tz",
+                timestamp,
+                day
+        );
+    }
+
+    private static void printCommit(Commit commit) {
+        System.out.println("===");
+        System.out.println("commit " + commit.getSHA1());
+        // handle the merge
+        if (commit.getSecondFather() != null) {
+            System.out.println("Merge: " + commit.getFirstFather().substring(0, 7) + " " + commit.getSecondFather().substring(0, 7));
+        }
+        System.out.println("Date: " + formatDate(commit.getTimestamp()));
+        System.out.println(commit.getMessage());
+        System.out.println("");
+    }
+
+    public static void logFuc() {
+        Commit commit = getHEADCommit();
+
+        printCommit(commit);
+        while (commit.getFirstFather() != null) {
+            commit = getObjectFromCommit(join(COMMIT_DIR, commit.getFirstFather()));
+            printCommit(commit);
+        }
+    }
+
+    /**
+     * global log function as follows :
+     *    -  Use function in Utils to foreach the Commit file to print all commit
+     */
+
+    public static void globalLogFuc() {
+        List<String> list = getAllFileName(COMMIT_DIR);
+        for (String commitName: list) {
+            printCommit(getObjectFromCommit(join(COMMIT_DIR, commitName)));
+        }
+    }
+
+    /**
+     * Find function as follows :
+     *     -  Use the function in Utils to foreach the Commit file to find the satisfying commit
+     * @return boolean to find whether some Commit satisfy the same message
+     */
+
+    public static boolean findFuc(String message) {
+        List<String> list = getAllFileName(COMMIT_DIR);
+        boolean isCommitExist = false;
+        for (String commitName : list) {
+            Commit commit = getObjectFromCommit(join(COMMIT_DIR, commitName));
+            if (commit.getMessage().equals(message)) {
+                isCommitExist = true;
+                System.out.println(commit.getSHA1());
+            }
+        }
+        return isCommitExist;
+    }
+
+    /**
+     * Status functions as follows :
+     * 1. Find the modified but not stage file
+     * @param TreeSet : use set to collect the fileName and sort.
+     * @param HashMap : use map to collect the description of file, "modified" or "deleted".
+     *      -  Check the commit and get [fileName, fileSHA1], then compare to the WorkFile.
+     *              -   If file in CWD, compare the file content, if change but not add to stage, ADD
+     *              -   If file do not in CWD and not stage to STAGE/REMOVE, ADD
+     *      -  Check the STAGE/ADD and get [file], then compare to the WorkFile.
+     *              -   If file in CWD, compare the file content, if change but not add to stage, ADD
+     *              -   If file do not in CWD, ADD
+     * 2. Find the untracked file
+     * @param TreeSet : same as forwards
+     *      -  Check the file in CWD, if neither the file in commit nor STAGE/ADD, ADD
+     */
+
+    /*
+     Print the information that all in dir and don't need to select
+     */
+
+    private static void printAllBranch() {
+        List<String> list = getAllFileName(BRANCH_DIR);
+        String frontestBranchName = getFrontestBranchName();
+        System.out.println("=== Branches ===");
+        for (String branchName : list) {
+            if (branchName.equals(frontestBranchName)) {
+                System.out.println("*" + branchName);
+            } else {
+                System.out.println(branchName);
+            }
+        }
+        System.out.println("");
+    }
+
+    private static void printAllStageAdd() {
+        List<String> list = getAllFileName(STAGE_ADDITION_DIR);
+        System.out.println("=== Staged Files ===");
+        for (String fileName : list) {
+            System.out.println(fileName);
+        }
+        System.out.println("");
+    }
+
+    private static void printAllStageRemove() {
+        List<String> list = getAllFileName(STAGE_REMOVE_DIR);
+        System.out.println("=== Removed Files ===");
+        for (String fileName : list) {
+            System.out.println(fileName);
+        }
+        System.out.println("");
+    }
+
+    /*
+     Try to select the modified but not stage file in COMMIT and STAGE/ADDTION
+     */
+
+    private static void selectFileFromCommit(Set<String> modifyButNotStage, HashMap<String, String> mapRecordChange) {
+        Commit headCommit = getHEADCommit();
+        TreeMap<String, String> trackedFiles = headCommit.getTrackedFiles();
+        for (Map.Entry<String, String> entry : trackedFiles.entrySet()) {
+            String fileName = entry.getKey();
+            String fileSHA1 = entry.getValue();
+            File fileInCWD = join(CWD, fileName);
+            if (fileInCWD.exists()) {
+                if (!isFileContentSame(getFileFromBLob(fileSHA1), fileInCWD)) {
+                    if (!isFileInStageAdd(fileInCWD)) {
+                        modifyButNotStage.add(fileName);
+                        mapRecordChange.put(fileName, "modified");
+                    }
+                }
+            } else {
+                if (!isFileInStageRem(fileInCWD)) {
+                    modifyButNotStage.add(fileName);
+                    mapRecordChange.put(fileName, "deleted");
+                }
+            }
+        }
+    }
+
+    private static void selectFileFromStageAdd(Set<String> modifyButNotStage, HashMap<String, String> mapRecordChange) {
+        List<String> list = getAllFileName(STAGE_ADDITION_DIR);
+        for (String fileName : list) {
+            File fileInCWD = join(CWD, fileName);
+            File fileInStageAdd = join(STAGE_ADDITION_DIR, fileName);
+            if (fileInCWD.exists()) {
+                if (!isFileContentSame(fileInCWD, fileInStageAdd)) {
+                    modifyButNotStage.add(fileName);
+                    mapRecordChange.put(fileName, "modified");
+                }
+            } else {
+                modifyButNotStage.add(fileName);
+                mapRecordChange.put(fileName, "deleted");
+            }
+        }
+    }
+
+    /*
+     Try to select the untracked file in CWD
+     */
+
+    private static void selectFileFromWork(Set<String> untrackedFiles) {
+        List<String> list = getAllFileName(CWD);
+        Commit headCommit = getHEADCommit();
+        for (String fileName : list) {
+            File file = join(CWD, fileName);
+            if (!isFileInStageAdd(file) && isFileInCommit(headCommit, file)) {
+                untrackedFiles.add(fileName);
+            }
+        }
+    }
+
+    private static void printModifyButNotStage() {
+        Set<String> modifyButNotStage = new TreeSet<>();
+        HashMap<String, String> mapRecordChange = new HashMap<>();
+        selectFileFromCommit(modifyButNotStage, mapRecordChange);
+        selectFileFromStageAdd(modifyButNotStage, mapRecordChange);
+
+        System.out.println("=== Modifications Not Staged For Commit ===");
+        for (String fileName : modifyButNotStage) {
+            System.out.println(fileName + " " + "(" + mapRecordChange.get(fileName) + ")");
+        }
+        System.out.println("");
+    }
+
+    private static void printUntrackedFiles() {
+        Set<String> untrackedFiles = new TreeSet<>();
+        selectFileFromWork(untrackedFiles);
+
+        System.out.println("=== Untracked Files ===");
+        for (String fileName : untrackedFiles) {
+            System.out.println(fileName);
+        }
+        System.out.println("");
+    }
+
+    public static void statusFuc() {
+        printAllBranch();
+        printAllStageAdd();
+        printAllStageRemove();
+        printModifyButNotStage();
+        printUntrackedFiles();
     }
 }

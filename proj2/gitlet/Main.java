@@ -21,8 +21,18 @@ public class Main {
      *                      .Stage / --
      *                      .Branch / --
      *  Add [file name]  --  add file to Stage
+     *
      *  commit [message]  -- commit
-     *  rm [file name] -- rm
+     *
+     *  rm [file name]  -- rm
+     *
+     *  log  -- log
+     *
+     *  global-log   -- global-log
+     *
+     *  find [commit message]  -- find
+     *
+     *  status  --  status
      */
     public static void main(String[] args) {
         if (args.length == 0) {
@@ -85,4 +95,26 @@ public class Main {
             System.exit(0);
         }
     }
+
+    private static void log(String[] args) {
+        logFuc();
+    }
+
+    private static void globalLog(String[] args) {
+        globalLogFuc();
+    }
+
+    private static void find(String[] args) {
+        boolean ok = findFuc(args[1]);
+        if (!ok) {
+            System.out.println("Found no commit with that message.");
+            System.exit(0);
+        }
+    }
+
+    private static void status(String[] args) {
+        statusFuc();
+    }
+
+    
 }
