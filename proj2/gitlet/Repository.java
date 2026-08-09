@@ -14,15 +14,15 @@ import static gitlet.Utils.*;
  *  @author icovo
  */
 public class Repository {
-    /**
-     * .gitlet/ --   top Folder to storage the information needed for gitlet
-     *    - Commit/ --  Stage the Commit class and Named this by their SHA1
-     *    - Blob/ --
-     *    - Stage/ --
-     *          - Addition/  -- The file needed to add
-     *          - Remove/  -- The file remove from next Commit
-     *    - HEAD/  --  store the frontest BranchName
-     *    - Branch/ --
+    /** The structure of .gitlet dir
+      .gitlet/ --   top Folder to storage the information needed for gitlet
+            Commit/ --  Store the Commit class and Named this by their SHA1
+            Blob/ --  Store the Commit tracked files
+            Stage/ --
+                    Addition/  -- The file needed to add
+                    Remove/  -- The file remove from next Commit
+            HEAD.txt  --  Store the frontest BranchName
+            Branch/ --  Store the Branch class
      */
 
     /** The current working directory. */
@@ -61,7 +61,7 @@ public class Repository {
 
     // get FILE SHA1
     public static String getFileSHA1(File file) {
-        return sha1(readContents(file));
+        return sha1((Object) readContents(file));
     }
 
     // COMPARE FILE
@@ -72,7 +72,7 @@ public class Repository {
     // COPY file
     private static void copyFile(File file, File copyfile) {
         byte[] content = readContents(file);
-        writeContents(copyfile, content);
+        writeContents(copyfile, (Object) content);
     }
 
     // Get class from file
@@ -91,7 +91,7 @@ public class Repository {
 
     // Get the frontest branch from HEAD
     private static String getFrontestBranchName() {
-        return (String)(readContentsAsString(HEAD_DIR));
+        return readContentsAsString(HEAD_DIR);
     }
 
     // Get the HEAD COMMIT
@@ -133,7 +133,7 @@ public class Repository {
         STAGE_ADDITION_DIR.mkdir();
         STAGE_REMOVE_DIR.mkdir();
         BRANCH_DIR.mkdir();
-        HEAD_DIR.mkdir();
+        writeContents(HEAD_DIR, "");
 
         // set the first commit then PERSIST
         Commit commit = new Commit(null, "initial commit", new Date(0L));
@@ -401,8 +401,8 @@ public class Repository {
     /**
      * Status functions as follows :
      * 1. Find the modified but not stage file
-     * @param TreeSet : use set to collect the fileName and sort.
-     * @param HashMap : use map to collect the description of file, "modified" or "deleted".
+     * param TreeSet : use set to collect the fileName and sort.
+     * param HashMap : use map to collect the description of file, "modified" or "deleted".
      *      -  Check the commit and get [fileName, fileSHA1], then compare to the WorkFile.
      *              -   If file in CWD, compare the file content, if change but not add to stage, ADD
      *              -   If file do not in CWD and not stage to STAGE/REMOVE, ADD
@@ -410,7 +410,7 @@ public class Repository {
      *              -   If file in CWD, compare the file content, if change but not add to stage, ADD
      *              -   If file do not in CWD, ADD
      * 2. Find the untracked file
-     * @param TreeSet : same as forwards
+     * param TreeSet : same as forwards
      *      -  Check the file in CWD, if neither the file in commit nor STAGE/ADD, ADD
      */
 
@@ -503,7 +503,7 @@ public class Repository {
         Commit headCommit = getHEADCommit();
         for (String fileName : list) {
             File file = join(CWD, fileName);
-            if (!isFileInStageAdd(file) && isFileInCommit(headCommit, file)) {
+            if (!isFileInStageAdd(file) && !isFileInCommit(headCommit, file)) {
                 untrackedFiles.add(fileName);
             }
         }

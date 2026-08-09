@@ -16,10 +16,12 @@ public class Main {
      *  Runs one of here commands:
      *  Init  --  init the basic repo
      *                  .gitlet / -- top level folder
-     *                      .Blob / --
-     *                      .Commit / --
-     *                      .Stage / --
-     *                      .Branch / --
+     *                          Blob / -- dir
+     *                          Commit / -- dir
+     *                          Stage / -- dir
+     *                          Branch / -- dir
+     *                          HEAD.txt / -- file
+     *
      *  Add [file name]  --  add file to Stage
      *
      *  commit [message]  -- commit
@@ -43,7 +45,7 @@ public class Main {
         String firstArg = args[0];
         switch(firstArg) {
             case "init":
-                init();
+                init(args);
                 break;
             case "add":
                 add(args);
@@ -54,10 +56,13 @@ public class Main {
             case "rm":
                 remove(args);
                 break;
+            case "status":
+                status(args);
+                break;
         }
     }
 
-    private static void init() {
+    private static void init(String[] args) {
         if (GITLET_DIR.exists()) {
             System.out.println("A Gitlet version-control system already exists in the current directory.");
             System.exit(0);
@@ -115,6 +120,4 @@ public class Main {
     private static void status(String[] args) {
         statusFuc();
     }
-
-    
 }
