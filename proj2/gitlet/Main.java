@@ -2,6 +2,7 @@ package gitlet;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static gitlet.Repository.*;
 import static gitlet.Utils.join;
@@ -56,8 +57,20 @@ public class Main {
             case "rm":
                 remove(args);
                 break;
+            case "log":
+                log(args);
+                break;
+            case "global-log":
+                globalLog(args);
+                break;
+            case "find":
+                find(args);
+                break;
             case "status":
                 status(args);
+                break;
+            case "checkout":
+                checkout(args);
                 break;
         }
     }
@@ -119,5 +132,15 @@ public class Main {
 
     private static void status(String[] args) {
         statusFuc();
+    }
+
+    private static void checkout(String[] args) {
+        if (Objects.equals(args[1], "--")) {
+            checkoutWithFileNameFuc(args[2]);
+        } else if (Objects.equals(args[2], "--")) {
+            checkoutWithCommitFuc(args[1], args[3]);
+        } else {
+            checkoutWithBranch(args[1]);
+        }
     }
 }

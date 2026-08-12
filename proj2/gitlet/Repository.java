@@ -89,6 +89,16 @@ public class Repository {
         return join(BLOB_DIR, fileSHA1);
     }
 
+    // Get file from Commit
+    private static File getFileFromCommit(Commit commit, String fileName) {
+        return getFileFromBLob(commit.getFileId(fileName));
+    }
+
+    // Get Commit From Branch
+    private static Commit getCommitFromBranch(Branch branch) {
+        return getObjectFromCommit(join(COMMIT_DIR, branch.getCommitSHA1()));
+    }
+
     // Get the frontest branch from HEAD
     private static String getFrontestBranchName() {
         return readContentsAsString(HEAD_DIR);
@@ -97,7 +107,7 @@ public class Repository {
     // Get the HEAD COMMIT
     private static Commit getHEADCommit() {
         Branch frontestBranch = getObjectFromBranch(join(BRANCH_DIR, getFrontestBranchName()));
-        return getObjectFromCommit(join(COMMIT_DIR, frontestBranch.getCommitSHA1()));
+        return getCommitFromBranch(frontestBranch);
     }
 
     // MOVE HEAD, Change the HEAD To new Commit, then SETPERSISTENCE
@@ -114,8 +124,15 @@ public class Repository {
     }
 
     // Get all file name from file dir
-    public static List<String> getAllFileName(File file) {
+    private static List<String> getAllFileName(File file) {
         return plainFilenamesIn(file);
+    }
+
+    // Move the file in Commit to CWD
+    private static void writeFileInCWDWithCommit(Commit commit, String fileName) {
+        File fileInCWD = join(CWD, fileName);
+        File fileInCommit = getFileFromCommit(commit, fileName);
+        copyFile(fileInCWD, fileInCommit);
     }
 
     /**
@@ -300,7 +317,7 @@ public class Repository {
      *          -- Add the file to Stage/Remove.
      *          -- Delete from workspace.
      *  - UNFOLLOWED :
-     *          -- If the file have added then delete it.
+     *          -- If the file have added to Stage then delete it from Stage
      */
 
     public static boolean removeFuc(String fileName) {
@@ -321,7 +338,7 @@ public class Repository {
             deleteFileInStage(file);
         }
 
-        return (!(isFileInHEAD || isFileInStage));
+        return (isFileInHEAD || isFileInStage);
     }
 
     /**
@@ -539,5 +556,114 @@ public class Repository {
         printAllStageRemove();
         printModifyButNotStage();
         printUntrackedFiles();
+    }
+
+    /**
+     * checkout function as follows :
+     * - [file name]
+     *          --  Replace or add a file taken from HEAD branch by file name
+     *          --  if file not exist  [error information]
+     * - [commit id] [file name]
+     *          --  Replace or add a file taken from given commit by file name
+     *          --  if file not exist  [error information]
+     * - [branch name]
+     *          -- Check out given branch to find the specific commit, write all file in specific commit to CWD, there are some situations:
+     *                      - file not exist in CWD, add
+     *                      - file exist in CWD and tracked by HEAD, replace
+     *                      - file exist in CWD and untracked by HEAD, error [error information]
+     *                      // notice that file in CWD and untracked by both HEAD and BRANCH , do nothing
+     *          -- Check out the file in CWD, delete the file that tracked by HEAD but untracked by specific commit, delete
+     *          -- Move the HEAD to specific commit
+     *          -- Clear the stage
+     */
+
+    // replace file in CWD with commit, contains [error information] because the file should firstly exist in commit
+    private static void replaceFileInCWDWithCommit(Commit commit, String fileName) {
+        if (!commit.isFileExist(fileName)) {
+            System.out.println("File does not exist in that commit.");
+            System.exit(0);
+        }
+        writeFileInCWDWithCommit(commit, fileName);
+    }
+
+    //  The first functions
+    //  The ERRO HANDLE is in function [replaceFileInCWDWithCommit]
+    public static void checkoutWithFileNameFuc(String fileName) {
+        replaceFileInCWDWithCommit(getHEADCommit(), fileName);
+    }
+
+    // The second functions
+    public static void checkoutWithCommitFuc(String commitSHA1, String fileName) {
+        File commitFile = join(COMMIT_DIR, commitSHA1);
+        if (!commitFile.exists()) {
+            System.out.println("No commit with that id exists.");
+            System.exit(0);
+        }
+        replaceFileInCWDWithCommit(getObjectFromCommit(commitFile), fileName);
+    }
+
+    // Check whether there exist the file in CWD that head commit do not have but the branch commit have
+    private static boolean checkUntrackedFile(Commit checkCommit) {
+        Commit headCommit = getHEADCommit();
+        List<String> filesInCWD = getAllFileName(CWD);
+        for (String fileName : filesInCWD) {
+            File fileInCWD = join(CWD, fileName);
+            if (!isFileInCommit(headCommit, fileInCWD) && isFileInCommit(checkCommit, fileInCWD)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // Delete the stage
+    private static void deleteStage() {
+        List<String> fileInStageAdd = getAllFileName(STAGE_ADDITION_DIR);
+        List<String> fileInStageRem = getAllFileName(STAGE_REMOVE_DIR);
+        for (String fileName : fileInStageAdd) {
+            deleteFileInStage(join(STAGE_ADDITION_DIR, fileName));
+        }
+        for (String fileName : fileInStageRem) {
+            deleteFileInStage(join(STAGE_REMOVE_DIR, fileName));
+        }
+    }
+
+    // The third functions
+    public static void checkoutWithBranch(String branchName) {
+        File branchFile = join(BRANCH_DIR, branchName);
+        if (!branchFile.exists()) {
+            System.out.println("No such branch exists.");
+            System.exit(0);
+        }
+        if (branchName.equals(getFrontestBranchName())) {
+            System.out.println("No need to checkout the current branch.");
+            System.exit(0);
+        }
+
+        Branch branch = getObjectFromBranch(branchFile);
+        Commit commit = getCommitFromBranch(branch);
+        // Check and print error information
+        if (checkUntrackedFile(commit)) {
+            System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
+            System.exit(0);
+        }
+        // Commit -> CWD
+        TreeMap<String, String> trackedFiles = commit.getTrackedFiles();
+        for (Map.Entry<String, String> entry : trackedFiles.entrySet()) {
+            String fileName = entry.getKey();
+            writeFileInCWDWithCommit(commit, fileName);
+        }
+        // Delete file -> HEAD && file !-> Commit
+        List<String> filesInCWD = getAllFileName(CWD);
+        Commit headCommit = getHEADCommit();
+        for (String fileName : filesInCWD) {
+            File fileInCWD = join(CWD, fileName);
+            if (isFileInCommit(headCommit, fileInCWD) && !isFileInCommit(commit, fileInCWD)) {
+                fileInCWD.delete();
+            }
+        }
+        // HEAD -> branch
+        moveHEAD(branch);
+        // Stage -> null
+        deleteStage();
     }
 }
