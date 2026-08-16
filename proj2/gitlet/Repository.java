@@ -70,8 +70,8 @@ public class Repository {
     }
 
     // COPY file
-    private static void copyFile(File file, File copyfile) {
-        byte[] content = readContents(file);
+    private static void copyFile(File orginfile, File copyfile) {
+        byte[] content = readContents(orginfile);
         writeContents(copyfile, (Object) content);
     }
 
@@ -132,7 +132,7 @@ public class Repository {
     private static void writeFileInCWDWithCommit(Commit commit, String fileName) {
         File fileInCWD = join(CWD, fileName);
         File fileInCommit = getFileFromCommit(commit, fileName);
-        copyFile(fileInCWD, fileInCommit);
+        copyFile(fileInCommit, fileInCWD);
     }
 
     /**

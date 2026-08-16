@@ -136,10 +136,13 @@ public class Main {
 
     private static void checkout(String[] args) {
         if (Objects.equals(args[1], "--")) {
+            System.out.println(1);
             checkoutWithFileNameFuc(args[2]);
-        } else if (Objects.equals(args[2], "--")) {
+        } else if (args.length == 4 && Objects.equals(args[2], "--")) {
+            System.out.println(2);
             checkoutWithCommitFuc(args[1], args[3]);
         } else {
+            System.out.println(3);
             checkoutWithBranch(args[1]);
         }
     }
