@@ -1,5 +1,6 @@
 package gitlet;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -13,29 +14,33 @@ import static gitlet.Utils.plainFilenamesIn;
  */
 public class Main {
 
-    /** Usage: java gitlet.Main ARGS, where ARGS contains
-     *  Runs one of here commands:
-     *  Init  --  init the basic repo
-     *                  .gitlet / -- top level folder
-     *                          Blob / -- dir
-     *                          Commit / -- dir
-     *                          Stage / -- dir
-     *                          Branch / -- dir
-     *                          HEAD.txt / -- file
+    /**
+     *  Runs one of three commands:
+     *  init  --  init the basic repo
      *
-     *  Add [file name]  --  add file to Stage
+     *  add [file name]
      *
-     *  commit [message]  -- commit
+     *  commit [message]
      *
-     *  rm [file name]  -- rm
+     *  rm [file name]
      *
-     *  log  -- log
+     *  log
      *
-     *  global-log   -- global-log
+     *  global-log
      *
-     *  find [commit message]  -- find
+     *  find [commit message]
      *
-     *  status  --  status
+     *  status
+     *
+     *  checkout -- [file name]
+     *  checkout [commit id] -- [file name]
+     *  checkout [branch name]
+     *
+     *  branch [branch name]
+     *
+     *  rm-branch [branch name]
+     *
+     *  reset [commit id]
      */
     public static void main(String[] args) {
         if (args.length == 0) {
@@ -71,6 +76,15 @@ public class Main {
                 break;
             case "checkout":
                 checkout(args);
+                break;
+            case "branch":
+                branch(args);
+                break;
+            case "rm-branch":
+                rmbranch(args);
+                break;
+            case "reset":
+                reset(args);
                 break;
         }
     }
@@ -145,5 +159,21 @@ public class Main {
             System.out.println(3);
             checkoutWithBranch(args[1]);
         }
+    }
+
+    private static void branch(String[] args) {
+        if (join(BRANCH_DIR, args[1]).exists()) {
+            System.out.println("A branch with that name already exists.");
+            System.exit(0);
+        }
+        branchFuc(args[1]);
+    }
+
+    private static void rmbranch(String[] args) {
+        rmbranchFuc(args[1]);
+    }
+
+    private static void reset(String[] args) {
+        resetFuc(args[1]);
     }
 }

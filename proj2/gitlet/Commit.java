@@ -26,7 +26,6 @@ public class Commit implements Serializable {
         this.message = message;
         this.trackedFiles = new TreeMap<>();
         this.timestamp = new Date(timestamp.getTime());
-        SHA1 = sha1(serialize(this));
     }
 
     public Commit(String message, Commit parent) {
@@ -34,7 +33,6 @@ public class Commit implements Serializable {
         this.message = message;
         this.timestamp = new Date();
         this.trackedFiles = new TreeMap<>(parent.getTrackedFiles());
-        SHA1 = sha1(serialize(this));
     }
 
     private String calculateSHA1() {
@@ -43,10 +41,7 @@ public class Commit implements Serializable {
 
     // get SHA1
     public String getSHA1() {
-        if (SHA1 == null) {
-            SHA1 = calculateSHA1();
-        }
-        return SHA1;
+        return calculateSHA1();
     }
 
     public String getFileId(String fileName) {
