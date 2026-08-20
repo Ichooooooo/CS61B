@@ -1,5 +1,6 @@
 package gitlet;
 
+import javax.swing.*;
 import java.io.File;
 import java.util.*;
 
@@ -99,14 +100,19 @@ public class Repository {
         return getObjectFromCommit(join(COMMIT_DIR, branch.getCommitSHA1()));
     }
 
-    // Get the frontest branch from HEAD
-    private static String getHEADBranch() {
+    // Get the frontest branchName from HEAD
+    private static String getHEADBranchName() {
         return readContentsAsString(HEAD_DIR);
+    }
+
+    // Get the frontest branch from HEAD
+    private static Branch getHEADBranch() {
+        return getObjectFromBranch(join(BRANCH_DIR, getHEADBranchName()));
     }
 
     // Get the HEAD COMMIT
     private static Commit getHEADCommit() {
-        Branch frontestBranch = getObjectFromBranch(join(BRANCH_DIR, getHEADBranch()));
+        Branch frontestBranch = getHEADBranch();
         return getCommitFromBranch(frontestBranch);
     }
 
@@ -195,6 +201,11 @@ public class Repository {
         }
     }
 
+    // Check if file in CWD
+    private static boolean ifFileInCWD(String fileName) {
+        File file = join(CWD, fileName);
+        return file.exists();
+    }
     /**
      * Init : init the repo
      * - Set the basic Folder
@@ -203,6 +214,11 @@ public class Repository {
      */
 
     public static void initFuc() {
+        if (GITLET_DIR.exists()) {
+            System.out.println("A Gitlet version-control system already exists in the current directory.");
+            System.exit(0);
+        }
+
         GITLET_DIR.mkdir();
         COMMIT_DIR.mkdir();
         BLOB_DIR.mkdir();
@@ -301,6 +317,11 @@ public class Repository {
     }
 
     public static void addFuc(String fileName) {
+        if (!join(CWD, fileName).exists()) {
+            System.out.println("File does not exist.");
+            System.exit(0);
+        }
+
         Commit commit = getHEADCommit();
         File file = join(CWD, fileName);
 
@@ -359,15 +380,22 @@ public class Repository {
         return true;
     }
 
-    public static boolean commitFuc(String message) {
+    public static void commitFuc(String[] args) {
+        if (args.length == 1) {
+            System.out.println("Please enter a commit message.");
+            System.exit(0);
+        }
+        String message = args[1];
         Commit headCommit = getHEADCommit();
         Commit newCommit = new Commit(message, headCommit);
         boolean ok1 = addFileFromStageToCommit(newCommit);
         boolean ok2 = removeFileFromStageToCommit(newCommit);
-        if (!(ok1 || ok2)) return false;
+        if (!(ok1 || ok2)) {
+            System.out.println("No changes added to the commit.");
+            System.exit(0);
+        }
         setPersistence(newCommit);
-        moveBranchAndHEAD(getHEADBranch(), newCommit);
-        return true;
+        moveBranchAndHEAD(getHEADBranchName(), newCommit);
     }
 
     /**
@@ -380,7 +408,7 @@ public class Repository {
      *          -- If the file have added to Stage then delete it from Stage
      */
 
-    public static boolean removeFuc(String fileName) {
+    public static void removeFuc(String fileName) {
         Commit commit = getHEADCommit();
         File file = join(CWD, fileName);
         boolean isFileInHEAD = false, isFileInStage = false;
@@ -398,7 +426,10 @@ public class Repository {
             deleteFileInStage(file);
         }
 
-        return (isFileInHEAD || isFileInStage);
+        if (!(isFileInHEAD || isFileInStage)) {
+            System.out.println("No reason to remove the file.");
+            System.exit(0);
+        }
     }
 
     /**
@@ -431,7 +462,7 @@ public class Repository {
         }
         System.out.println("Date: " + formatDate(commit.getTimestamp()));
         System.out.println(commit.getMessage());
-        System.out.println("");
+        System.out.println();
     }
 
     public static void logFuc() {
@@ -459,10 +490,10 @@ public class Repository {
     /**
      * Find function as follows :
      *     -  Use the function in Utils to foreach the Commit file to find the satisfying commit
-     * @return boolean to find whether some Commit satisfy the same message
+     * boolean to find whether some Commit satisfy the same message
      */
 
-    public static boolean findFuc(String message) {
+    public static void findFuc(String message) {
         List<String> list = getAllFileName(COMMIT_DIR);
         boolean isCommitExist = false;
         for (String commitName : list) {
@@ -472,7 +503,10 @@ public class Repository {
                 System.out.println(commit.getSHA1());
             }
         }
-        return isCommitExist;
+        if (!isCommitExist) {
+            System.out.println("Found no commit with that message.");
+            System.exit(0);
+        }
     }
 
     /**
@@ -497,7 +531,7 @@ public class Repository {
 
     private static void printAllBranch() {
         List<String> list = getAllFileName(BRANCH_DIR);
-        String frontestBranchName = getHEADBranch();
+        String frontestBranchName = getHEADBranchName();
         System.out.println("=== Branches ===");
         for (String branchName : list) {
             if (branchName.equals(frontestBranchName)) {
@@ -506,7 +540,7 @@ public class Repository {
                 System.out.println(branchName);
             }
         }
-        System.out.println("");
+        System.out.println();
     }
 
     private static void printAllStageAdd() {
@@ -515,7 +549,7 @@ public class Repository {
         for (String fileName : list) {
             System.out.println(fileName);
         }
-        System.out.println("");
+        System.out.println();
     }
 
     private static void printAllStageRemove() {
@@ -524,7 +558,7 @@ public class Repository {
         for (String fileName : list) {
             System.out.println(fileName);
         }
-        System.out.println("");
+        System.out.println();
     }
 
     /*
@@ -607,7 +641,7 @@ public class Repository {
         for (String fileName : untrackedFiles) {
             System.out.println(fileName);
         }
-        System.out.println("");
+        System.out.println();
     }
 
     public static void statusFuc() {
@@ -648,12 +682,12 @@ public class Repository {
 
     //  The first functions
     //  The ERRO HANDLE is in function [replaceFileInCWDWithCommit]
-    public static void checkoutWithFileNameFuc(String fileName) {
+    private static void checkoutWithFileNameFuc(String fileName) {
         replaceFileInCWDWithCommit(getHEADCommit(), fileName);
     }
 
     // The second functions
-    public static void checkoutWithCommitFuc(String commitId, String fileName) {
+    private static void checkoutWithCommitFuc(String commitId, String fileName) {
         File commitFile;
         if (commitId.length() >= 40) {
             commitFile = join(COMMIT_DIR, commitId);
@@ -668,13 +702,13 @@ public class Repository {
     }
 
     // The third functions
-    public static void checkoutWithBranch(String branchName) {
+    private static void checkoutWithBranch(String branchName) {
         File branchFile = join(BRANCH_DIR, branchName);
         if (!branchFile.exists()) {
             System.out.println("No such branch exists.");
             System.exit(0);
         }
-        if (branchName.equals(getHEADBranch())) {
+        if (branchName.equals(getHEADBranchName())) {
             System.out.println("No need to checkout the current branch.");
             System.exit(0);
         }
@@ -696,12 +730,37 @@ public class Repository {
         deleteStage();
     }
 
+    public static void checkoutFuc(String[] args) {
+        if (Objects.equals(args[1], "--")) {
+            if (args.length > 3) {
+                System.out.println("Incorrect operands.");
+                System.exit(0);
+            }
+            checkoutWithFileNameFuc(args[2]);
+        } else if (Objects.equals(args[2], "--")) {
+            if (args.length > 4) {
+                System.out.println("Incorrect operands.");
+                System.exit(0);
+            }
+            checkoutWithCommitFuc(args[1], args[3]);
+        } else {
+            if (args.length > 2) {
+                System.out.println("Incorrect operands.");
+                System.exit(0);
+            }
+            checkoutWithBranch(args[1]);
+        }
+    }
     /**
      * branch functions as follows :
      * -  create a new branch and point to HEAD commit
      */
 
     public static void branchFuc(String branchName) {
+        if (join(BRANCH_DIR, branchName).exists()) {
+            System.out.println("A branch with that name already exists.");
+            System.exit(0);
+        }
         Branch newBranch = new Branch(branchName, getHEADCommit().getSHA1());
         setPersistence(newBranch);
     }
@@ -717,7 +776,7 @@ public class Repository {
             System.out.println("A branch with that name does not exist.");
             System.exit(0);
         }
-        if (branchName.equals(getHEADBranch())) {
+        if (branchName.equals(getHEADBranchName())) {
             System.out.println("Cannot remove the current branch.");
             System.exit(0);
         }
@@ -752,10 +811,299 @@ public class Repository {
         checkoutAllCommit(targetCommit);
         // Delete file -> HEAD, file !-> target commit
         deleteFileInCWDCommitNotExist(targetCommit);
-        // Branch -> target commit
-        Branch nowBranch = getObjectFromBranch(join(BRANCH_DIR, getHEADBranch()));
+        // Branch -> target commit, notice PERSISTENCE
+        Branch nowBranch = getHEADBranch();
         nowBranch.movePointer(targetCommit.getSHA1());
+        setPersistence(nowBranch);
         // Delete STAGE
         deleteStage();
+    }
+
+    /**
+     * merge function as follows :
+     * There are two branch : HEAD branch, Merge branch
+     * There are three commit : Split Point Commit, HEAD Commit, Merge Commit
+     *
+     * [ERROR INFORMATION] : file in CWD, in Merge, NOT in HEAD
+     *
+     * 1. File tracked by SP commit
+     * - There are three situation file in other commit compare to SP : same(1), change(2), delete(3)
+     *      - File same in HEAD commit, same in Merge commit (11)
+     *              - do nothing
+     *      - File changed in HEAD commit, same in Merge commit (12)
+     *              - do nothing
+     *      - File same in HEAD commit, changed in Merge commit (12)
+     *              - checkout the file in Merge Commit
+     *              - stage file to add
+     *      - File delete in HEAD commit, same in Merge commit (13)         [ERROR INFORMATION]
+     *              - do nothing
+     *      - File same in HEAD commit, delete in Merge commit (13)
+     *              - delete the file
+     *              - stage file to delete
+     *      - File changed in HEAD commit, changed in Merge commit (22)
+     *              - if two changed file is same
+     *                      - do nothing
+     *              - if two changed file is different
+     *                      - using new content replace the conflict file
+     *                      - stage file to add
+     *                      - print conflict message to bash (ONLY ONCE even there maybe many conflicts)
+     *      - File changed in ..., but delete by ...(23, 23)        [ERROR INFORMATION]
+     *              - using new content replace the conflict file
+     *              - stage file to add
+     *              - print conflict message to bash (ONLY ONCE even there maybe many conflicts)
+     *      - File deleted by HEAD commit, deleted by Merge commit (33)
+     *              - do nothing
+     *
+     * 2. File untracked by SP commit
+     * - There are three situation compare HEAD file to Merge file : content same(1), content different(2), one have another not(3)
+     *      - File same in two (1)
+     *              - do nothing
+     *      - File content different in two (2)
+     *              - using new content replace the conflict file
+     *              - stage file to add
+     *              - print conflict message to bash (ONLY ONCE even there maybe many conflicts)
+     *      - File create in HEAD commit, Merge commit not (3)
+     *              - do nothing
+     *      - File create in Merge commit, HEAD commit not (3)         [ERROR INFORMATION]
+     *              - check out the file in Merge commit
+     *              - stage file to add
+     */
+
+    // Mark the branch list from start commit list using set
+    private static void markCommitList(Set<String> set, Commit strCommit) {
+        Commit commit = strCommit;
+        set.add(commit.getSHA1());
+        while(commit.getFirstFather() != null) {
+            commit = getObjectFromCommit(join(COMMIT_DIR, commit.getFirstFather()));
+            set.add(commit.getSHA1());
+        }
+    }
+
+    // Find the nearest first father of two commit
+    private static Commit findNearestFather(Commit commit1, Commit commit2) {
+        Set<String> commitSet = new HashSet<>();
+        markCommitList(commitSet, commit1);
+        if (commitSet.contains(commit2.getSHA1())) {
+            return commit2;
+        }
+        while (commit2.getFirstFather() != null) {
+            commit2 = getObjectFromCommit(join(COMMIT_DIR, commit2.getFirstFather()));
+            if (commitSet.contains(commit2.getSHA1())) {
+                return commit2;
+            }
+        }
+        return null;
+    }
+
+    // Find the Split Point of two branch
+    private static Commit getSplitPoint(Branch br1, Branch br2) {
+        return findNearestFather(getObjectFromCommit(join(COMMIT_DIR, br1.getCommitSHA1())), getObjectFromCommit(join(COMMIT_DIR, br2.getCommitSHA1())));
+    }
+
+    // return rebuild content from two conflict file
+    private static String handleConflictFile(File HEADFile, File mergeFile) {
+        String newContent = "<<<<<<< HEAD\n";
+        if (HEADFile != null) {
+            newContent = newContent + readContentsAsString(HEADFile) + "\n";
+        }
+        newContent = newContent + "=======\n";
+        if (mergeFile != null) {
+            newContent = newContent + readContentsAsString(mergeFile) + "\n";
+        }
+        newContent = newContent + ">>>>>>>\n";
+        return newContent;
+    }
+
+    // handle the file that tracked by split point, return boolean to judge if conflict
+    private static boolean handleSpExist(Commit spCommit, Commit HEADCommit, Commit mergeCommit) {
+        TreeMap<String, String> spTrackedFiles = spCommit.getTrackedFiles();
+        boolean isConflict = false;
+        for (Map.Entry<String, String> entry : spTrackedFiles.entrySet()) {
+            String fileName = entry.getKey();
+            String fileSHA1 = entry.getValue();
+            // same : file is same
+            // change : file is exist but changed
+            // lose : file is deleted
+            boolean same1 = false, change1 = false, delete1 = false;
+            boolean same2 = false, change2 = false, delete2 = false;
+            // judge two commit situation
+            if (HEADCommit.isFileExist(fileName)) {
+                if (fileSHA1.equals(HEADCommit.getFileId(fileName)))  same1 = true;
+                else  change1 = true;
+            } else {
+                delete1 = true;
+            }
+            if (mergeCommit.isFileExist(fileName)) {
+                if (fileSHA1.equals(mergeCommit.getFileId(fileName)))  same2 = true;
+                else  change2 = true;
+            } else {
+                delete2 = true;
+            }
+
+            // handle situation below :
+            if (same1 && same2) {
+                // File is all same in two commit
+                continue;
+            } else if (same1 && change2) {
+                // File changed in merge, same in HEAD
+                checkoutWithCommitFuc(mergeCommit.getSHA1(), fileName);
+                storeFileInStageAdd(getFileFromBLob(mergeCommit.getFileId(fileName)));
+            } else if (same2 && change1) {
+                // File changed in HEAD, same in merge
+                continue;
+            } else if (same2 && delete1) {
+                // File delete in HEAD, same in merge
+                continue;
+            } else if (same1 && delete2) {
+                // File delete in merge, same in HEAD
+                File fileInCWD = join(CWD, fileName);
+                fileInCWD.delete();
+                storeFileInStageRemove(fileInCWD);
+            } else if (change1 && change2) {
+                // File change in both, if content is same do nothing, else headle conflict
+                if (HEADCommit.getFileId(fileName).equals(mergeCommit.getFileId(fileName))) {
+                    continue;
+                }
+                isConflict = true;
+                String newContent = handleConflictFile(getFileFromCommit(HEADCommit, fileName), getFileFromCommit(mergeCommit, fileName));
+                File file = join(CWD, fileName);
+                writeContents(file, (Object) newContent);
+                storeFileInStageAdd(file);
+            } else if (change1 && delete2) {
+                // File change in HEAD, delete in merge
+                isConflict = true;
+                String newContent = handleConflictFile(getFileFromCommit(HEADCommit, fileName), null);
+                File file = join(CWD, fileName);
+                writeContents(file, (Object) newContent);
+                storeFileInStageAdd(file);
+            } else if (change2 && delete1) {
+                // File changed in merge, delete in HEAD
+                isConflict = true;
+                String newContent = handleConflictFile(null, getFileFromCommit(mergeCommit, fileName));
+                File file = join(CWD, fileName);
+                writeContents(file, newContent);
+                storeFileInStageAdd(file);
+            } else if (delete1 && delete2) {
+                continue;
+            }
+        }
+
+        return isConflict;
+    }
+
+    // handle the file not tracked by split point, return boolean to judge conflict
+    private static boolean handleSpNotExist(Commit spCommit, Commit HEADCommit, Commit mergeCommit) {
+        boolean isConflict = false;
+        Map<String, String> HEADTrackedFiles = HEADCommit.getTrackedFiles();
+
+        // compare file from HEAD
+        for (Map.Entry<String, String> entry : HEADTrackedFiles.entrySet()) {
+            String fileName = entry.getKey();
+
+            // have handled file skip
+            if (spCommit.isFileExist(fileName)) continue;
+
+            if (mergeCommit.isFileExist(fileName)) {
+                // if file exist in merge
+                if (HEADCommit.getFileId(fileName).equals(mergeCommit.getFileId(fileName))) {
+                    // if content same, do nothing
+                    continue;
+                } else {
+                    // if content different, handle conflict
+                    isConflict = true;
+                    String newContent = handleConflictFile(getFileFromCommit(HEADCommit, fileName), getFileFromCommit(mergeCommit, fileName));
+                    File file = join(CWD, fileName);
+                    writeContents(file, newContent);
+                    storeFileInStageAdd(file);
+                }
+            } else {
+                // file not exit in merge
+                continue;
+            }
+        }
+
+        Map<String, String> mergeTrackedFiles = mergeCommit.getTrackedFiles();
+        // compare file from merge
+        for (Map.Entry<String, String> entry : mergeTrackedFiles.entrySet()) {
+            String fileName = entry.getKey();
+
+            // have handled file skip
+            if (spCommit.isFileExist(fileName)) continue;
+
+            if (HEADCommit.isFileExist(fileName)) {
+                // the file have handle before
+                continue;
+            } else {
+                // file not exit in HEAD
+                File fileInCWD = join(CWD, fileName);
+                copyFile(getFileFromCommit(mergeCommit, fileName), fileInCWD);
+                storeFileInStageAdd(fileInCWD);
+            }
+        }
+
+        return isConflict;
+    }
+
+    private static boolean handleErrorInformation(Commit HEADCommit, Commit mergeCommit) {
+        Map<String, String> trackedFiles = mergeCommit.getTrackedFiles();
+        for (Map.Entry<String, String> entry : trackedFiles.entrySet()) {
+            String fileName = entry.getKey();
+            if (!HEADCommit.isFileExist(fileName) && ifFileInCWD(fileName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean isStageEmpty() {
+        return plainFilenamesIn(STAGE_ADDITION_DIR) == null && plainFilenamesIn(STAGE_REMOVE_DIR) == null;
+    }
+
+    private static void mergeCommit(String firstFather, String secondFather, String message) {
+        Commit newCommit = new Commit(firstFather, secondFather, message);
+        addFileFromStageToCommit(newCommit);
+        removeFileFromStageToCommit(newCommit);
+        setPersistence(newCommit);
+        moveBranchAndHEAD(getHEADBranchName(), newCommit);
+    }
+
+    public static void mergeFuc(String branchName) {
+        if (!isStageEmpty()) {
+            System.out.println("You have uncommitted changes.");
+            System.exit(0);
+        }
+        if (!join(BRANCH_DIR, branchName).exists()) {
+            System.out.println("A branch with that name does not exist.");
+            System.exit(0);
+        }
+        if (branchName.equals(getHEADBranchName())) {
+            System.out.println("Cannot merge a branch with itself.");
+            System.exit(0);
+        }
+
+        Branch HEADBranch = getObjectFromBranch(join(BRANCH_DIR, getHEADBranchName()));
+        Branch mergeBranch = getObjectFromBranch(join(BRANCH_DIR, branchName));
+        Commit spCommit = getSplitPoint(HEADBranch, mergeBranch);
+        Commit HEADCommit = getCommitFromBranch(HEADBranch);
+        Commit mergeCommit = getCommitFromBranch(mergeBranch);
+
+        if (handleErrorInformation(HEADCommit, mergeCommit)) {
+            System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
+            System.exit(0);
+        }
+
+        boolean isConflict =  handleSpExist(spCommit, HEADCommit, mergeCommit);
+        isConflict = (isConflict | handleSpNotExist(spCommit, HEADCommit, mergeCommit));
+
+        if (isStageEmpty()) {
+            System.out.println("No changes added to the commit.");
+            System.exit(0);
+        }
+
+        String mergeMessage = "Merged " + branchName + " into " + getHEADBranchName();
+        mergeCommit(HEADBranch.getCommitSHA1(), mergeBranch.getCommitSHA1(), mergeMessage);
+        if (isConflict) {
+            System.out.println("Encountered a merge conflict.");
+        }
     }
 }
