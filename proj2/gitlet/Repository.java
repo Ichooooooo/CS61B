@@ -6,14 +6,11 @@ import java.util.*;
 
 import static gitlet.Utils.*;
 
-// TODO: any imports you need here
-
 /** Represents a gitlet repository.
- *  TODO: It's a good idea to give a description here of what else this Class
- *  does at a high level.
- *
+ *  All function need to achieve gitlet in here
  *  @author icovo
  */
+
 public class Repository {
     /** The structure of .gitlet dir
       .gitlet/ --   top Folder to storage the information needed for gitlet
@@ -284,6 +281,7 @@ public class Repository {
     }
 
     // CREATE new File in STAGE
+    // [DEBUG] notice that the name of stage add file is same as the file translate into
     private static void storeFileInStageAdd(File file) {
         File stageFile = join(STAGE_ADDITION_DIR, file.getName());
         copyFile(file, stageFile);
@@ -389,7 +387,7 @@ public class Repository {
 
     public static void commitFuc(String[] args) {
         String message = args[1];
-        if (message == "") {
+        if (message.equals("")) {
             System.out.println("Please enter a commit message.");
             System.exit(0);
         }
@@ -737,6 +735,7 @@ public class Repository {
         deleteStage();
     }
 
+    // [DEBUG] : Need judge the length of args firstly, not use the index firstly
     public static void checkoutFuc(String[] args) {
         if (args.length == 2) {
             checkoutWithBranch(args[1]);
@@ -832,7 +831,15 @@ public class Repository {
      * There are two branch : HEAD branch, Merge branch
      * There are three commit : Split Point Commit, HEAD Commit, Merge Commit
      *
-     * [ERROR INFORMATION] : file in CWD, in Merge, NOT in HEAD
+     * [SPECIAL SITUATION] :
+     *          1. sp commit = merge commit
+     *              - have merged, [Given branch is an ancestor of the current branch.] then exit
+     *          2. sp commit = HEAD commit
+     *              - check out the merge branch, [Current branch fast-forwarded.] then exit
+     *
+     * [ERROR INFORMATION] : 1.file in CWD 2.in Merge 3.NOT in HEAD.
+     *                       - NOT in sp
+     *                       - In sp but content not same
      *
      * 1. File tracked by SP commit
      * - There are three situation file in other commit compare to SP : same(1), change(2), delete(3)
@@ -843,7 +850,7 @@ public class Repository {
      *      - File same in HEAD commit, changed in Merge commit (12)
      *              - checkout the file in Merge Commit
      *              - stage file to add
-     *      - File delete in HEAD commit, same in Merge commit (13)         [ERROR INFORMATION]
+     *      - File delete in HEAD commit, same in Merge commit (13)
      *              - do nothing
      *      - File same in HEAD commit, delete in Merge commit (13)
      *              - delete the file
@@ -855,7 +862,7 @@ public class Repository {
      *                      - using new content replace the conflict file
      *                      - stage file to add
      *                      - print conflict message to bash (ONLY ONCE even there maybe many conflicts)
-     *      - File changed in ..., but delete by ...(23, 23)        [ERROR INFORMATION]
+     *      - File changed in ..., but delete by ...(23, 23)
      *              - using new content replace the conflict file
      *              - stage file to add
      *              - print conflict message to bash (ONLY ONCE even there maybe many conflicts)
@@ -872,12 +879,13 @@ public class Repository {
      *              - print conflict message to bash (ONLY ONCE even there maybe many conflicts)
      *      - File create in HEAD commit, Merge commit not (3)
      *              - do nothing
-     *      - File create in Merge commit, HEAD commit not (3)         [ERROR INFORMATION]
+     *      - File create in Merge commit, HEAD commit not (3)
      *              - check out the file in Merge commit
      *              - stage file to add
      */
 
-    // Mark the branch list from start commit list using set
+    // Mark the branch list from start commit list using DFS
+    // [DEBUG] : the commit construct a DAG, not just list, DFS should mark the point have visited
     private static void markCommitList(Set<String> set, Commit commit) {
         if (!set.add(commit.getSHA1())) {
             return;
@@ -890,7 +898,8 @@ public class Repository {
         }
     }
 
-    // Find the nearest first father of two commit
+    // Find the nearest first father of two commit, using BFS
+    // [DEBUG] : BFS should mark the point that have pop out by queue
     private static Commit findNearestFather(Commit commit1, Commit commit2) {
         Set<String> commitSet = new HashSet<>();
         markCommitList(commitSet, commit1);
@@ -1066,6 +1075,7 @@ public class Repository {
         return isConflict;
     }
 
+    // [DEBUG] error judge is wrong at first
     private static boolean handleErrorInformation(Commit spCommit, Commit HEADCommit, Commit mergeCommit) {
         for (Map.Entry<String, String> entry : mergeCommit.getTrackedFiles().entrySet()) {
             String fileName = entry.getKey();
@@ -1087,10 +1097,19 @@ public class Repository {
         return false;
     }
 
+    // [DEBUG] judge the dir is empty PLEASE using the functions, not null, because the dir is existed but just empty
     private static boolean isStageEmpty() {
         return plainFilenamesIn(STAGE_ADDITION_DIR).isEmpty() && plainFilenamesIn(STAGE_REMOVE_DIR).isEmpty();
     }
 
+    /*
+     * Merge commit is some different :
+     *      - the first father is HEAD commit, the second father is given commit
+     *      - the message is "Merged [given branch name] into [current branch name]."
+     *      - the other is same as normal commit
+     */
+
+    // [DEBUG] the new commit should firstly inherit its first father's trackedFiles(Map)
     private static void mergeCommit(String firstFather, String secondFather, String message) {
         Commit newCommit = new Commit(getCommitFromSHA1(firstFather), secondFather, message);
         addFileFromStageToCommit(newCommit);
@@ -1098,6 +1117,7 @@ public class Repository {
         setPersistence(newCommit);
         moveBranchAndHEAD(getHEADBranchName(), newCommit);
     }
+
 
     public static void mergeFuc(String branchName) {
         if (!isStageEmpty()) {

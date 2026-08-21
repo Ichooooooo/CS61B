@@ -15,34 +15,55 @@ import static gitlet.Utils.plainFilenamesIn;
 public class Main {
 
     /**
-     *  Runs one of three commands:
-     *  init  --  init the basic repo
+     *  [ERROR INFORMATION]
+     *      -  not enter a command
+     *          - [Please enter a command.]
+     *      -  enter a no meaning command
+     *          - [No command with that name exists.]
+     *      -  enter an incorrect command, nums is wrong or format wrong
+     *          - [Incorrect operands.]
+     *      -  not init (no .gitlet dir) but the command need firstly init
+     *          - [Not in an initialized Gitlet directory.]
      *
-     *  add [file name]
+     *  [.GITLET DIR]
+     *  .gitlet/ -- top level folder for all persistent data for gitlet
+     *      - Blob/ -- folder contains all files tracked by commit
+     *      - Branch/ -- folder contains all branch created
+     *      - Commit/ -- folder contains all commit created
+     *      - Stage/
+     *          - Addition/ -- folder store the file need to add to commit
+     *          - Remove/ -- folder store the file need to delete from commit
+     *      - HEAD.txt  -- store the name of HEAD branch
      *
-     *  commit [message]
+     *  [COMMANDS] - Runs one of their commands:
      *
-     *  rm [file name]
+     *  init    -- init .gitlet directory
      *
-     *  log
+     *  add [file name]    -- tracked a file new situation, add the file to .gitlet/Stage
      *
-     *  global-log
+     *  commit [message]    -- based on the stage information, create a new commit, tracked or untracked some file
      *
-     *  find [commit message]
+     *  rm [file name]      -- remove the file you tracked
      *
-     *  status
+     *  log     -- print from HEAD commit to first commit list information
      *
-     *  checkout -- [file name]
-     *  checkout [commit id] -- [file name]
-     *  checkout [branch name]
+     *  global-log      -- print all commit information
      *
-     *  branch [branch name]
+     *  find [commit message]       -- find all commit that have input message
      *
-     *  rm-branch [branch name]
+     *  status        -- print all branch and  print the file in stage additon, in stage remove, changed but not tracked new situation, untracked
      *
-     *  reset [commit id]
+     *  checkout -- [file name]         -- write the file with file name in HEAD commit to CWD, not stage it
+     *  checkout [commit id] -- [file name]         -- write the file with file name in given commit to CWD, not stage it
+     *  checkout [branch name]          -- check out the given branch commit to CWD, changed the HEAD branch to given branch
      *
-     *  merge [branch name]
+     *  branch [branch name]        -- create a new branch pointed to HEAD commit
+     *
+     *  rm-branch [branch name]         -- remove the branch (only branch not move file or commit)
+     *
+     *  reset [commit id]       -- check out the given commit to CWD, changed the located branch commit to given commit
+     *
+     *  merge [branch name]         -- merge the given branch to HEAD branch then commit, HEAD branch move to new commit
      */
     public static void main(String[] args) {
         if (args.length == 0) {
