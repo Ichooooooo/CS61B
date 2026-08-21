@@ -35,11 +35,11 @@ public class Commit implements Serializable {
         this.trackedFiles = new TreeMap<>(parent.getTrackedFiles());
     }
 
-    public Commit(String firstFather, String secondFather, String message) {
-        this.firstFather = firstFather;
-        this.secondFather = secondFather;
+    public Commit(Commit firstFather, String secondFatherSHA1, String message) {
+        this.trackedFiles = new TreeMap<>(firstFather.getTrackedFiles());
+        this.firstFather = firstFather.getSHA1();
+        this.secondFather = secondFatherSHA1;
         this.message = message;
-        this.trackedFiles = new TreeMap<>();
         this.timestamp = new Date();
     }
 

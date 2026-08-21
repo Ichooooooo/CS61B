@@ -95,9 +95,14 @@ public class Repository {
         return getFileFromBLob(commit.getFileId(fileName));
     }
 
+    // Get commit From SHA1
+    private static Commit getCommitFromSHA1(String SHA1) {
+        return getObjectFromCommit(join(COMMIT_DIR, SHA1));
+    }
+
     // Get Commit From Branch
     private static Commit getCommitFromBranch(Branch branch) {
-        return getObjectFromCommit(join(COMMIT_DIR, branch.getCommitSHA1()));
+        return getCommitFromSHA1(branch.getCommitSHA1());
     }
 
     // Get the frontest branchName from HEAD
@@ -313,7 +318,7 @@ public class Repository {
 
     // Judge if file in COMMIT
     private static boolean isFileInCommit(Commit commit, File file) {
-        return commit.isFileExist(file.getName()) && isFileContentSame(file, getFileFromBLob(commit.getFileId(file.getName())));
+        return commit.isFileExist(file.getName());
     }
 
     public static void addFuc(String fileName) {
@@ -325,20 +330,22 @@ public class Repository {
         Commit commit = getHEADCommit();
         File file = join(CWD, fileName);
 
-        if (isFileInCommit(commit, file)) {
+        if (isFileInCommit(commit, file) && isFileContentSame(getFileFromCommit(commit, fileName), file)) {
+//            System.out.println("file is same");
             deleteFileInStage(file);
             return;
         }
 
         if (isFileInStageAdd(file)) {
+//            System.out.println("have add");
             updateFileInStage(file);
-        }
-
-        if (isFileInStageRem(file)) {
+        } else if (isFileInStageRem(file)) {
+//            System.out.println("have delete readd");
             readdFileInStage(file);
+        } else {
+//            System.out.println("new add");
+            storeFileInStageAdd(file);
         }
-
-        storeFileInStageAdd(file);
     }
 
     /**
@@ -381,11 +388,11 @@ public class Repository {
     }
 
     public static void commitFuc(String[] args) {
-        if (args.length == 1) {
+        String message = args[1];
+        if (message == "") {
             System.out.println("Please enter a commit message.");
             System.exit(0);
         }
-        String message = args[1];
         Commit headCommit = getHEADCommit();
         Commit newCommit = new Commit(message, headCommit);
         boolean ok1 = addFileFromStageToCommit(newCommit);
@@ -470,7 +477,7 @@ public class Repository {
 
         printCommit(commit);
         while (commit.getFirstFather() != null) {
-            commit = getObjectFromCommit(join(COMMIT_DIR, commit.getFirstFather()));
+            commit = getCommitFromSHA1(commit.getFirstFather());
             printCommit(commit);
         }
     }
@@ -731,24 +738,25 @@ public class Repository {
     }
 
     public static void checkoutFuc(String[] args) {
-        if (Objects.equals(args[1], "--")) {
-            if (args.length > 3) {
-                System.out.println("Incorrect operands.");
-                System.exit(0);
-            }
-            checkoutWithFileNameFuc(args[2]);
-        } else if (Objects.equals(args[2], "--")) {
-            if (args.length > 4) {
-                System.out.println("Incorrect operands.");
-                System.exit(0);
-            }
-            checkoutWithCommitFuc(args[1], args[3]);
-        } else {
-            if (args.length > 2) {
-                System.out.println("Incorrect operands.");
-                System.exit(0);
-            }
+        if (args.length == 2) {
             checkoutWithBranch(args[1]);
+        } else if (args.length == 3) {
+            if (Objects.equals(args[1], "--")) {
+                checkoutWithFileNameFuc(args[2]);
+            } else {
+                System.out.println("Incorrect operands.");
+                System.exit(0);
+            }
+        } else if (args.length == 4) {
+            if (Objects.equals(args[2], "--")) {
+                checkoutWithCommitFuc(args[1], args[3]);
+            } else {
+                System.out.println("Incorrect operands.");
+                System.exit(0);
+            }
+        } else {
+            System.out.println("Incorrect operands.");
+            System.exit(0);
         }
     }
     /**
@@ -870,12 +878,15 @@ public class Repository {
      */
 
     // Mark the branch list from start commit list using set
-    private static void markCommitList(Set<String> set, Commit strCommit) {
-        Commit commit = strCommit;
-        set.add(commit.getSHA1());
-        while(commit.getFirstFather() != null) {
-            commit = getObjectFromCommit(join(COMMIT_DIR, commit.getFirstFather()));
-            set.add(commit.getSHA1());
+    private static void markCommitList(Set<String> set, Commit commit) {
+        if (!set.add(commit.getSHA1())) {
+            return;
+        }
+        if (commit.getFirstFather() != null) {
+            markCommitList(set, getCommitFromSHA1(commit.getFirstFather()));
+        }
+        if (commit.getSecondFather() != null) {
+            markCommitList(set, getCommitFromSHA1(commit.getSecondFather()));
         }
     }
 
@@ -883,13 +894,23 @@ public class Repository {
     private static Commit findNearestFather(Commit commit1, Commit commit2) {
         Set<String> commitSet = new HashSet<>();
         markCommitList(commitSet, commit1);
-        if (commitSet.contains(commit2.getSHA1())) {
-            return commit2;
-        }
-        while (commit2.getFirstFather() != null) {
-            commit2 = getObjectFromCommit(join(COMMIT_DIR, commit2.getFirstFather()));
-            if (commitSet.contains(commit2.getSHA1())) {
-                return commit2;
+
+        Queue<Commit> queue = new ArrayDeque<>();
+        queue.add(commit2);
+        Set<String> visited = new HashSet<>();
+        while(!queue.isEmpty()) {
+            Commit commit = queue.poll();
+            if (visited.contains(commit.getSHA1())) continue;
+            visited.add(commit.getSHA1());
+
+            if (commitSet.contains(commit.getSHA1())) {
+                return commit;
+            }
+            if (commit.getFirstFather() != null) {
+                queue.add(getCommitFromSHA1(commit.getFirstFather()));
+            }
+            if (commit.getSecondFather() != null) {
+                queue.add(getCommitFromSHA1(commit.getSecondFather()));
             }
         }
         return null;
@@ -897,18 +918,18 @@ public class Repository {
 
     // Find the Split Point of two branch
     private static Commit getSplitPoint(Branch br1, Branch br2) {
-        return findNearestFather(getObjectFromCommit(join(COMMIT_DIR, br1.getCommitSHA1())), getObjectFromCommit(join(COMMIT_DIR, br2.getCommitSHA1())));
+        return findNearestFather(getCommitFromSHA1(br1.getCommitSHA1()), getCommitFromSHA1(br2.getCommitSHA1()));
     }
 
     // return rebuild content from two conflict file
     private static String handleConflictFile(File HEADFile, File mergeFile) {
         String newContent = "<<<<<<< HEAD\n";
         if (HEADFile != null) {
-            newContent = newContent + readContentsAsString(HEADFile) + "\n";
+            newContent = newContent + readContentsAsString(HEADFile);
         }
         newContent = newContent + "=======\n";
         if (mergeFile != null) {
-            newContent = newContent + readContentsAsString(mergeFile) + "\n";
+            newContent = newContent + readContentsAsString(mergeFile);
         }
         newContent = newContent + ">>>>>>>\n";
         return newContent;
@@ -947,7 +968,8 @@ public class Repository {
             } else if (same1 && change2) {
                 // File changed in merge, same in HEAD
                 checkoutWithCommitFuc(mergeCommit.getSHA1(), fileName);
-                storeFileInStageAdd(getFileFromBLob(mergeCommit.getFileId(fileName)));
+                File fileInCWD = join(CWD, fileName);
+                storeFileInStageAdd(fileInCWD);
             } else if (same2 && change1) {
                 // File changed in HEAD, same in merge
                 continue;
@@ -1044,23 +1066,33 @@ public class Repository {
         return isConflict;
     }
 
-    private static boolean handleErrorInformation(Commit HEADCommit, Commit mergeCommit) {
-        Map<String, String> trackedFiles = mergeCommit.getTrackedFiles();
-        for (Map.Entry<String, String> entry : trackedFiles.entrySet()) {
+    private static boolean handleErrorInformation(Commit spCommit, Commit HEADCommit, Commit mergeCommit) {
+        for (Map.Entry<String, String> entry : mergeCommit.getTrackedFiles().entrySet()) {
             String fileName = entry.getKey();
-            if (!HEADCommit.isFileExist(fileName) && ifFileInCWD(fileName)) {
+            if (HEADCommit.isFileExist(fileName)) {
+                continue;
+            }
+            if (!ifFileInCWD(fileName)) {
+                continue;
+            }
+            if (!spCommit.isFileExist(fileName)) {
+                return true;
+            }
+            if (!spCommit.getFileId(fileName)
+                    .equals(mergeCommit.getFileId(fileName))) {
                 return true;
             }
         }
+
         return false;
     }
 
     private static boolean isStageEmpty() {
-        return plainFilenamesIn(STAGE_ADDITION_DIR) == null && plainFilenamesIn(STAGE_REMOVE_DIR) == null;
+        return plainFilenamesIn(STAGE_ADDITION_DIR).isEmpty() && plainFilenamesIn(STAGE_REMOVE_DIR).isEmpty();
     }
 
     private static void mergeCommit(String firstFather, String secondFather, String message) {
-        Commit newCommit = new Commit(firstFather, secondFather, message);
+        Commit newCommit = new Commit(getCommitFromSHA1(firstFather), secondFather, message);
         addFileFromStageToCommit(newCommit);
         removeFileFromStageToCommit(newCommit);
         setPersistence(newCommit);
@@ -1087,8 +1119,19 @@ public class Repository {
         Commit HEADCommit = getCommitFromBranch(HEADBranch);
         Commit mergeCommit = getCommitFromBranch(mergeBranch);
 
-        if (handleErrorInformation(HEADCommit, mergeCommit)) {
+        if (handleErrorInformation(spCommit, HEADCommit, mergeCommit)) {
             System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
+            System.exit(0);
+        }
+
+        if (spCommit.getSHA1().equals(mergeCommit.getSHA1())) {
+            System.out.println("Given branch is an ancestor of the current branch.");
+            System.exit(0);
+        }
+
+        if (spCommit.getSHA1().equals(HEADCommit.getSHA1())) {
+            checkoutWithBranch(branchName);
+            System.out.println("Current branch fast-forwarded.");
             System.exit(0);
         }
 
@@ -1100,7 +1143,7 @@ public class Repository {
             System.exit(0);
         }
 
-        String mergeMessage = "Merged " + branchName + " into " + getHEADBranchName();
+        String mergeMessage = "Merged " + branchName + " into " + getHEADBranchName() + ".";
         mergeCommit(HEADBranch.getCommitSHA1(), mergeBranch.getCommitSHA1(), mergeMessage);
         if (isConflict) {
             System.out.println("Encountered a merge conflict.");

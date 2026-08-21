@@ -109,7 +109,7 @@ public class Main {
     }
 
     private static void init(String[] args) {
-        if (args.length > 1) {
+        if (args.length != 1) {
             System.out.println("Incorrect operands.");
             System.exit(0);
         }
@@ -118,7 +118,7 @@ public class Main {
 
     private static void add(String[] args) {
         isGitletExist();
-        if (args.length > 2) {
+        if (args.length != 2) {
             System.out.println("Incorrect operands.");
             System.exit(0);
         }
@@ -127,7 +127,7 @@ public class Main {
 
     private static void commit(String[] args) {
         isGitletExist();
-        if (args.length > 2) {
+        if (args.length != 2) {
             System.out.println("Incorrect operands.");
             System.exit(0);
         }
@@ -136,7 +136,7 @@ public class Main {
 
     private static void remove(String[] args) {
         isGitletExist();
-        if (args.length > 2) {
+        if (args.length != 2) {
             System.out.println("Incorrect operands.");
             System.exit(0);
         }
@@ -145,7 +145,7 @@ public class Main {
 
     private static void log(String[] args) {
         isGitletExist();
-        if (args.length > 1) {
+        if (args.length != 1) {
             System.out.println("Incorrect operands.");
             System.exit(0);
         }
@@ -154,7 +154,7 @@ public class Main {
 
     private static void globalLog(String[] args) {
         isGitletExist();
-        if (args.length > 1) {
+        if (args.length != 1) {
             System.out.println("Incorrect operands.");
             System.exit(0);
         }
@@ -163,7 +163,7 @@ public class Main {
 
     private static void find(String[] args) {
         isGitletExist();
-        if (args.length > 2) {
+        if (args.length != 2) {
             System.out.println("Incorrect operands.");
             System.exit(0);
         }
@@ -172,7 +172,7 @@ public class Main {
 
     private static void status(String[] args) {
         isGitletExist();
-        if (args.length > 1) {
+        if (args.length != 1) {
             System.out.println("Incorrect operands.");
             System.exit(0);
         }
@@ -186,7 +186,7 @@ public class Main {
 
     private static void branch(String[] args) {
         isGitletExist();
-        if (args.length > 2) {
+        if (args.length != 2) {
             System.out.println("Incorrect operands.");
             System.exit(0);
         }
@@ -195,7 +195,7 @@ public class Main {
 
     private static void rmbranch(String[] args) {
         isGitletExist();
-        if (args.length > 2) {
+        if (args.length != 2) {
             System.out.println("Incorrect operands.");
             System.exit(0);
         }
@@ -204,7 +204,7 @@ public class Main {
 
     private static void reset(String[] args) {
         isGitletExist();
-        if (args.length > 2) {
+        if (args.length != 2) {
             System.out.println("Incorrect operands.");
             System.exit(0);
         }
@@ -213,7 +213,7 @@ public class Main {
 
     private static void merge(String[] args) {
         isGitletExist();
-        if (args.length > 2) {
+        if (args.length != 2) {
             System.out.println("Incorrect operands.");
             System.exit(0);
         }
