@@ -1,0 +1,55 @@
+# RandomSpeedTest
+
+1. length = 10, times = 10 / 100 / 1000, way = random / order
+class bstmap.ULLMap: 0.00 sec
+class bstmap.BSTMap: 0.00 sec
+Java's Built-in TreeMap: 0.00 sec
+Java's Built-in HashMap: 0.00 sec
+
+2.1.1 length = 10, times = 10000, way = random
+class bstmap.ULLMap: 0.22 sec
+class bstmap.BSTMap: 0.00 sec
+Java's Built-in TreeMap: 0.00 sec
+Java's Built-in HashMap: 0.00 sec
+
+2.1.2 length = 10, times = 10000, way = order
+class bstmap.ULLMap: 0.15 sec
+class bstmap.BSTMap: 0.00 sec
+Java's Built-in TreeMap: 0.00 sec
+Java's Built-in HashMap: 0.00 sec
+
+3.1.1 length = 20, times = 10000, way = random
+class bstmap.ULLMap: 0.31 sec
+class bstmap.BSTMap: 0.01 sec
+Java's Built-in TreeMap: 0.01 sec
+Java's Built-in HashMap: 0.00 sec
+
+3.1.2 length = 20, times = 10000, way = order
+class bstmap.ULLMap: 0.19 sec
+class bstmap.BSTMap: 0.01 sec
+Java's Built-in TreeMap: 0.01 sec
+Java's Built-in HashMap: 0.00 sec
+
+2.2.1 length = 10, times = 20000, way = random
+class bstmap.ULLMap: 0.82 sec
+class bstmap.BSTMap: 0.01 sec
+Java's Built-in TreeMap: 0.01 sec
+Java's Built-in HashMap: 0.01 sec
+
+2.2.2 length = 10, times = 20000, way = order
+class bstmap.ULLMap: 1.36 sec
+class bstmap.BSTMap: 0.01 sec
+Java's Built-in TreeMap: 0.01 sec
+Java's Built-in HashMap: 0.01 sec
+
+3.2.1 length = 20, times = 20000, way = random
+class bstmap.ULLMap: 1.05 sec
+class bstmap.BSTMap: 0.01 sec
+Java's Built-in TreeMap: 0.01 sec
+Java's Built-in HashMap: 0.00 sec
+
+3.2.2 length = 20, times = 20000, way = order
+class bstmap.ULLMap: 0.70 sec
+class bstmap.BSTMap: 0.01 sec
+Java's Built-in TreeMap: 0.01 sec
+Java's Built-in HashMap: 0.01 sec

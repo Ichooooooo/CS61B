@@ -99,7 +99,6 @@ public class ULLMap<K, V>  implements Map61B<K, V> {
         V val;
         /** Stores the next Entry in the linked list. */
         Entry next;
-
     }
 
     /** An iterator that iterates over the keys of the dictionary. */
