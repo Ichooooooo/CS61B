@@ -4,7 +4,7 @@ import edu.princeton.cs.algs4.BST;
 
 import java.util.*;
 
-public class BSTMap<K extends Comparable, V> implements Map61B<K, V>, Iterable<K> {
+public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V>{
     private class BSTNode<K, V> {
         // if no declaration, default package-private
         BSTNode<K, V> father;
@@ -268,7 +268,7 @@ public class BSTMap<K extends Comparable, V> implements Map61B<K, V>, Iterable<K
             }
         }
 
-        public BSTMapIterator(BSTNode<K, V> originNode) {
+        public BSTMapIterator (BSTNode<K, V> originNode) {
             pushLeft(originNode);
         }
 
@@ -293,5 +293,9 @@ public class BSTMap<K extends Comparable, V> implements Map61B<K, V>, Iterable<K
     @Override
     public Iterator<K> iterator() {
         return new BSTMapIterator(origin);
+    }
+
+    public void printInOrder() {
+        return;
     }
 }
