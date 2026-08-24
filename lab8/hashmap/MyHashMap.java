@@ -126,7 +126,15 @@ public class MyHashMap<K, V> implements Map61B<K, V> {
 
     @Override
     public boolean containsKey(K key) {
-        return get(key) != null;
+        int tableIndex = getIndex(key);
+
+        for (Node node : buckets[tableIndex]) {
+            if (node.key.equals(key)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     @Override
@@ -166,7 +174,7 @@ public class MyHashMap<K, V> implements Map61B<K, V> {
         Collection<Node> bucket = buckets[tableIndex];
 
         for (Node node : bucket) {
-            if (node.key.equals(key) && node.value.equals(value)) {
+            if (node.key.equals(key) && Objects.equals(node.value, value)) {
                 bucket.remove(node);
                 keySize--;
                 return node.value;
@@ -230,7 +238,7 @@ public class MyHashMap<K, V> implements Map61B<K, V> {
         private int tableIndex;
         private Iterator<Node> iterator;
 
-        public HashMapIterator() {
+        HashMapIterator() {
             size = 0;
             tableIndex = 0;
             iterator = buckets[0].iterator();
@@ -241,6 +249,9 @@ public class MyHashMap<K, V> implements Map61B<K, V> {
         }
 
         public K next() {
+            if (!hasNext()) {
+                throw new NoSuchElementException();
+            }
             if (iterator.hasNext()) {
                 Node node = iterator.next();
                 size++;
@@ -258,6 +269,7 @@ public class MyHashMap<K, V> implements Map61B<K, V> {
         }
     }
 
+    @Override
     public Iterator<K> iterator() {
         return new HashMapIterator();
     }
