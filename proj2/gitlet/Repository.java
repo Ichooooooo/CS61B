@@ -635,7 +635,7 @@ public class Repository {
         for (String fileName : modifyButNotStage) {
             System.out.println(fileName + " " + "(" + mapRecordChange.get(fileName) + ")");
         }
-        System.out.println("");
+        System.out.println();
     }
 
     private static void printUntrackedFiles() {
