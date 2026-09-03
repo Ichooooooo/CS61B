@@ -1,52 +1,132 @@
 package byow.Core;
 
+import byow.Core.WorldGenerator.WorldGenerator;
 import byow.TileEngine.TERenderer;
 import byow.TileEngine.TETile;
 
 public class Engine {
+
+    // 创建一个地图渲染器
     TERenderer ter = new TERenderer();
-    /* Feel free to change the width and height. */
-    public static final int WIDTH = 80;
-    public static final int HEIGHT = 30;
+
+    /*
+     * 你可以自由修改地图的宽度和高度。
+     */
+    public static final int WIDTH = 101;
+    public static final int HEIGHT = 61;
 
     /**
-     * Method used for exploring a fresh world. This method should handle all inputs,
-     * including inputs from the main menu.
+     * 用于开始并探索一个新的世界。
+     *
+     * 这个方法应该处理用户的所有键盘输入，
+     * 包括主菜单中的输入。
      */
     public void interactWithKeyboard() {
     }
 
     /**
-     * Method used for autograding and testing your code. The input string will be a series
-     * of characters (for example, "n123sswwdasdassadwas", "n123sss:q", "lwww". The engine should
-     * behave exactly as if the user typed these characters into the engine using
-     * interactWithKeyboard.
+     * 这个方法用于自动评测（autograding）和测试你的代码。
      *
-     * Recall that strings ending in ":q" should cause the game to quite save. For example,
-     * if we do interactWithInputString("n123sss:q"), we expect the game to run the first
-     * 7 commands (n123sss) and then quit and save. If we then do
-     * interactWithInputString("l"), we should be back in the exact same state.
+     * 输入参数 input 是一串字符，例如：
      *
-     * In other words, both of these calls:
-     *   - interactWithInputString("n123sss:q")
-     *   - interactWithInputString("lww")
+     * "n123sswwdasdassadwas"
+     * "n123sss:q"
+     * "lwww"
      *
-     * should yield the exact same world state as:
-     *   - interactWithInputString("n123sssww")
+     * Engine 应该表现得和用户在 interactWithKeyboard()
+     * 中一个一个敲入这些字符时完全一样。
      *
-     * @param input the input string to feed to your program
-     * @return the 2D TETile[][] representing the state of the world
+     *
+     * 需要记住：
+     *
+     * 以 ":q" 结尾的字符串应该让游戏：
+     *
+     * 保存（save）并退出（quit）。
+     *
+     *
+     * 例如：
+     *
+     * interactWithInputString("n123sss:q")
+     *
+     * 我们期望游戏先执行前 7 个命令：
+     *
+     * n123sss
+     *
+     * 然后执行：
+     *
+     * :q
+     *
+     * 保存当前游戏状态并退出。
+     *
+     *
+     * 如果之后再执行：
+     *
+     * interactWithInputString("l")
+     *
+     * 那么游戏应该恢复到刚才保存时完全相同的状态。
+     *
+     *
+     * 换句话说，下面这两次调用：
+     *
+     * interactWithInputString("n123sss:q")
+     *
+     * 然后：
+     *
+     * interactWithInputString("lww")
+     *
+     *
+     * 最后得到的世界状态，应该和直接调用：
+     *
+     * interactWithInputString("n123sssww")
+     *
+     * 得到的世界状态完全一致。
+     *
+     *
+     * @param input
+     *        要输入给程序的一串字符
+     *
+     * @return
+     *        一个二维 TETile[][] 数组，
+     *        表示最终世界的状态
      */
     public TETile[][] interactWithInputString(String input) {
-        // TODO: Fill out this method so that it run the engine using the input
-        // passed in as an argument, and return a 2D tile representation of the
-        // world that would have been drawn if the same inputs had been given
-        // to interactWithKeyboard().
-        //
-        // See proj3.byow.InputDemo for a demo of how you can make a nice clean interface
-        // that works for many different input types.
 
+        /*
+         * TODO：
+         *
+         * 完成这个方法。
+         *
+         * 让 Engine 根据参数 input 中传入的字符串运行游戏，
+         *
+         * 最后返回一个二维 tile 数组，
+         *
+         * 这个数组应该和用户通过 interactWithKeyboard()
+         * 输入完全相同指令时，屏幕最终显示出来的世界一致。
+         *
+         *
+         * 可以查看：
+         *
+         * proj3.byow.InputDemo
+         *
+         * 来看看如何设计一个比较干净的输入接口，
+         * 从而让同一套游戏逻辑同时支持多种输入方式。
+         */
+
+        input = input.toUpperCase();
         TETile[][] finalWorldFrame = null;
+
+        if (input.charAt(0) == 'N') {
+            StringBuilder seedString = new StringBuilder();
+            int index = 1;
+            while (input.charAt(index) != 'S') {
+                seedString.append(input.charAt(index));
+                index++;
+            }
+
+            long seed = Long.parseLong(String.valueOf(seedString));
+            finalWorldFrame = WorldGenerator.generate(seed);
+        }
+
         return finalWorldFrame;
     }
 }
