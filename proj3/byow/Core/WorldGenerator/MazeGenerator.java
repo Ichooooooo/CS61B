@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.Random;
 import java.util.Stack;
 
-import static byow.Core.Engine.HEIGHT;
-import static byow.Core.Engine.WIDTH;
+import static byow.Core.Render.WorldRender.HEIGHT;
+import static byow.Core.Render.WorldRender.WIDTH;
 
 /**
  * 通过洪水填充算法随机挖开迷宫

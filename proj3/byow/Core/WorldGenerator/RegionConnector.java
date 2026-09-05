@@ -5,8 +5,8 @@ import byow.TileEngine.Tileset;
 
 import java.util.*;
 
-import static byow.Core.Engine.HEIGHT;
-import static byow.Core.Engine.WIDTH;
+import static byow.Core.Render.WorldRender.HEIGHT;
+import static byow.Core.Render.WorldRender.WIDTH;
 import static byow.Core.WorldGenerator.WorldGenerator.getRegionSize;
 import static java.util.Collections.shuffle;
 
@@ -25,7 +25,7 @@ import static java.util.Collections.shuffle;
 public class RegionConnector {
 
     // 冗余连接点被额外打开的概率为 1 / EXTRA_CONNECTOR_CHANCE
-    private static final int EXTRA_CONNECTOR_CHANCE = 20;
+    private static final int EXTRA_CONNECTOR_CHANCE = 40;
 
     // 所有可能用于连接不同区域的候选连接点
     private final List<Connector> connectorPositions = new ArrayList<>();
