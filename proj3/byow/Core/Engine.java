@@ -269,8 +269,8 @@ public class Engine {
         Path path = Path.of("savefile.txt");
 
         try {
-            // 如果发现没有Save文件夹就创建
-            Files.createDirectories(path.getParent());
+//            // 如果发现没有Save文件夹就创建
+//            Files.createDirectories(path.getParent());
 
             // 将存档存入文件
             Files.writeString(path, historyString.toString());
@@ -285,4 +285,6 @@ public class Engine {
     private void quit() {
         state = GameState.QUIT;
     }
+
+    
 }
