@@ -81,20 +81,20 @@ public class Player {
      * 2. 更新 lastPositionType
      * 3. 渲染用户下一步站的位置
      * @param world 游戏世界
-     * @param x 当前横坐标
-     * @param y 当前纵坐标
-     * @param nextX 下一步的横坐标
-     * @param nextY 下一步的纵坐标
+     * @param width 当前横坐标
+     * @param height 当前纵坐标
+     * @param nextWidth 下一步的横坐标
+     * @param nextHeight 下一步的纵坐标
      */
-    private void moveTo(TETile[][] world, int x, int y, int nextX, int nextY) {
+    private void moveTo(TETile[][] world, int width, int height, int nextWidth, int nextHeight) {
         // 还原人物原来站的板块
-        world[x][y] = lastPositionType;
+        world[width][height] = lastPositionType;
 
         // 更新lastPositionType
-        lastPositionType = world[nextX][nextY];
+        lastPositionType = world[nextWidth][nextHeight];
 
         // 更新用户现在站的板块
-        world[nextX][nextY] = Tileset.AVATAR;
+        world[nextWidth][nextHeight] = Tileset.AVATAR;
     }
 
     /**

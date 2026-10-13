@@ -1,8 +1,10 @@
-target/
+gtarget/
 
 .idea/
 
 *.iml
 out/
 
-*.class 
+*.class
+
+Save/

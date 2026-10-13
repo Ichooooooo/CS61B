@@ -47,7 +47,7 @@ public class MazeGenerator {
     // 创建一个Pair类
     private static class Position {
         int x, y;
-        public Position(int x, int y) {
+        Position(int x, int y) {
             this.x = x;
             this.y = y;
         }

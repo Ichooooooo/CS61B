@@ -68,21 +68,21 @@ public class RoomGenerator {
      *
      * @param x 房间左下角的横坐标
      * @param y 房间左下角的纵坐标
-     * @param width 宽度
-     * @param height 高度
+     * @param roomWidth 宽度
+     * @param roomHeight 高度
      * @param regions 每个格子的连通块编号
      *
      * @return 生成位置是否合法
      * */
-    private boolean isLegal(int x, int y, int width, int height, int[][] regions) {
+    private boolean isLegal(int x, int y, int roomWidth, int roomHeight, int[][] regions) {
         // 检查房间位置是否超出地图大小，且地图四周不放置房间
-        if (x + width >= this.width || y + height >= this.height
+        if (x + roomWidth >= this.width || y + roomHeight >= this.height
                 || x < 1 || y < 1) {
             return false;
         }
 
-        for (int i = x - 1; i <= x + width; i++) {
-            for (int j = y - 1; j <= y + height; j++) {
+        for (int i = x - 1; i <= x + roomWidth; i++) {
+            for (int j = y - 1; j <= y + roomHeight; j++) {
                 if (regions[i][j] != 0) {
                     return false;
                 }

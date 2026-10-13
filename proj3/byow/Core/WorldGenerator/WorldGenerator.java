@@ -36,7 +36,8 @@ public class WorldGenerator {
         roomGenerator.generate(world, regions, rooms, random);
 
         // 生成迷宫
-        MazeGenerator mazeGenerator = new MazeGenerator(world, random, regions, getRegionSize(regions));
+        MazeGenerator mazeGenerator =
+                new MazeGenerator(world, random, regions, getRegionSize(regions));
         mazeGenerator.generateMaze();
 
         // 生成树

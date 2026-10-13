@@ -242,7 +242,7 @@ public class Engine {
      */
     private void loadGame() {
         // 读取路径
-        Path path = Path.of("byow/Core/Save/savefile.txt");
+        Path path = Path.of("savefile.txt");
 
         // 加载世界但不存在之前的存档，直接退出并关闭 UI
         if (!Files.exists(path)) {
@@ -266,7 +266,7 @@ public class Engine {
      * 存储当前存档，在发现没有Save文件夹的时候自动创建
      */
     private void saveGame() {
-        Path path = Path.of("byow/Core/Save/savefile.txt");
+        Path path = Path.of("savefile.txt");
 
         try {
             // 如果发现没有Save文件夹就创建
