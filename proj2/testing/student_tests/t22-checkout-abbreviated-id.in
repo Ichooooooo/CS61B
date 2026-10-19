@@ -1,0 +1,37 @@
+# Capture exactly 7 characters, not the complete 40-character commit ID.
+I definitions.inc
+> init
+<<<
++ wug.txt wug.txt
+> add wug.txt
+<<<
+> commit "version one"
+<<<
+> find "version one"
+([a-f0-9]{7})[a-f0-9]{33}
+<<<*
+D SHORT_V1 "${1}"
++ wug.txt notwug.txt
+> add wug.txt
+<<<
+> commit "version two"
+<<<
+> checkout ${SHORT_V1} -- wug.txt
+<<<
+= wug.txt wug.txt
+* .gitlet/Stage/Addition/wug.txt
+# File checkout must not move HEAD or the current branch.
+> log
+===
+${COMMIT_HEAD}
+version two
+
+===
+${COMMIT_HEAD}
+version one
+
+===
+${COMMIT_HEAD}
+initial commit
+
+<<<*

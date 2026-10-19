@@ -1,0 +1,7 @@
+# Regression: an unknown abbreviated ID must produce the diagnostic,
+# not a NullPointerException. The expected output is unchanged from k01.
+> init
+<<<
+> reset 0000000
+No commit with that id exists.
+<<<

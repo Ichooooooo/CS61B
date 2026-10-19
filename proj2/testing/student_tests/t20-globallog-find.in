@@ -1,0 +1,16 @@
+# global-log and find
+I definitions.inc
+> init
+<<<
+> global-log
+===
+${COMMIT_HEAD}
+initial commit
+
+<<<*
+> find "initial commit"
+[a-f0-9]{40}
+<<<*
+> find "no such message"
+Found no commit with that message.
+<<<

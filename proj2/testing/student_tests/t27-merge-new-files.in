@@ -1,0 +1,57 @@
+# Files absent from split point: ours only, theirs only, equal additions,
+# and different additions with the same name.
+I definitions.inc
+> init
+<<<
++ base.txt a.txt
+> add base.txt
+<<<
+> commit "base"
+<<<
+> branch dev
+<<<
++ ours.txt a.txt
++ shared.txt wug.txt
++ clash.txt notwug.txt
+> add ours.txt
+<<<
+> add shared.txt
+<<<
+> add clash.txt
+<<<
+> commit "master additions"
+<<<
+> checkout dev
+<<<
++ theirs.txt b.txt
++ shared.txt wug.txt
++ clash.txt dev-wug.txt
+> add theirs.txt
+<<<
+> add shared.txt
+<<<
+> add clash.txt
+<<<
+> commit "dev additions"
+<<<
+> checkout master
+<<<
+> merge dev
+Encountered a merge conflict.
+<<<
+= base.txt a.txt
+= ours.txt a.txt
+= theirs.txt b.txt
+= shared.txt wug.txt
+= clash.txt conflict-wug.txt
+* .gitlet/Stage/Addition/clash.txt
+* .gitlet/Stage/Addition/theirs.txt
+# Verify that copied and conflicted contents are actually in the new commit.
+- clash.txt
+- theirs.txt
+> checkout -- clash.txt
+<<<
+> checkout -- theirs.txt
+<<<
+= clash.txt conflict-wug.txt
+= theirs.txt b.txt

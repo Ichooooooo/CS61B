@@ -1,0 +1,64 @@
+# Reset by a real 7-character ID; retain branch name and clear both stages.
+I definitions.inc
+> init
+<<<
++ wug.txt wug.txt
+> add wug.txt
+<<<
+> commit "version one"
+<<<
+> find "version one"
+([a-f0-9]{7})[a-f0-9]{33}
+<<<*
+D SHORT_V1 "${1}"
+> branch dev
+<<<
+> checkout dev
+<<<
++ wug.txt notwug.txt
++ nota.txt nota.txt
+> add wug.txt
+<<<
+> add nota.txt
+<<<
+> commit "dev version two"
+<<<
+> rm wug.txt
+<<<
++ pending.txt a.txt
+> add pending.txt
+<<<
+E .gitlet/Stage/Remove/wug.txt
+E .gitlet/Stage/Addition/pending.txt
+> reset ${SHORT_V1}
+<<<
+= wug.txt wug.txt
+* nota.txt
+= pending.txt a.txt
+* .gitlet/Stage/Remove/wug.txt
+* .gitlet/Stage/Addition/pending.txt
+> status
+=== Branches ===
+*dev
+master
+
+=== Staged Files ===
+
+=== Removed Files ===
+
+=== Modifications Not Staged For Commit ===
+
+=== Untracked Files ===
+pending.txt
+
+<<<
+> log
+===
+${COMMIT_HEAD}
+version one
+
+===
+${COMMIT_HEAD}
+initial commit
+
+<<<*

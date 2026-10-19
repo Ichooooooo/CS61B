@@ -1,0 +1,19 @@
+# commands outside a repo, bad operands, unknown command
+I definitions.inc
+> add wug.txt
+Not in an initialized Gitlet directory.
+<<<
+> init
+<<<
+> add
+Incorrect operands.
+<<<
+> commit
+Incorrect operands.
+<<<
+> frobnicate
+No command with that name exists.
+<<<
+> add notb.txt
+File does not exist.
+<<<

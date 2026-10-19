@@ -1,0 +1,28 @@
+# a file can be both staged and modified afterwards
+I definitions.inc
+> init
+<<<
++ wug.txt wug.txt
+> add wug.txt
+<<<
+> commit "v1"
+<<<
++ wug.txt notwug.txt
+> add wug.txt
+<<<
++ wug.txt g.txt
+> status
+=== Branches ===
+*master
+
+=== Staged Files ===
+wug.txt
+
+=== Removed Files ===
+
+=== Modifications Not Staged For Commit ===
+wug.txt (modified)
+
+=== Untracked Files ===
+
+<<<

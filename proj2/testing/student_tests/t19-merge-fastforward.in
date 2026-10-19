@@ -1,0 +1,52 @@
+# fast-forward: HEAD switches to the given branch, the current branch stays put
+I definitions.inc
+> init
+<<<
++ wug.txt wug.txt
+> add wug.txt
+<<<
+> commit "base"
+<<<
+> branch dev
+<<<
+> checkout dev
+<<<
++ wug.txt notwug.txt
+> add wug.txt
+<<<
+> commit "dev ahead"
+<<<
+> checkout master
+<<<
+> merge dev
+Current branch fast-forwarded.
+<<<
+> status
+=== Branches ===
+*dev
+master
+
+=== Staged Files ===
+
+=== Removed Files ===
+
+=== Modifications Not Staged For Commit ===
+
+=== Untracked Files ===
+
+<<<
+= wug.txt notwug.txt
+> log
+===
+${COMMIT_HEAD}
+dev ahead
+
+===
+${COMMIT_HEAD}
+base
+
+===
+${COMMIT_HEAD}
+initial commit
+
+<<<*

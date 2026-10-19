@@ -1,0 +1,50 @@
+# rm removes tracked file from worktree and stages a removal;
+# rm of an untracked file is rejected and the file survives
+I definitions.inc
+> init
+<<<
++ wug.txt wug.txt
++ nota.txt nota.txt
+> add wug.txt
+<<<
+> commit "v1"
+<<<
+> rm wug.txt
+<<<
+* wug.txt
+E .gitlet/Stage/Remove/wug.txt
+> rm nota.txt
+No reason to remove the file.
+<<<
+E nota.txt
+> status
+=== Branches ===
+*master
+
+=== Staged Files ===
+
+=== Removed Files ===
+wug.txt
+
+=== Modifications Not Staged For Commit ===
+
+=== Untracked Files ===
+nota.txt
+
+<<<
+> commit "remove wug"
+<<<
+> status
+=== Branches ===
+*master
+
+=== Staged Files ===
+
+=== Removed Files ===
+
+=== Modifications Not Staged For Commit ===
+
+=== Untracked Files ===
+nota.txt
+
+<<<

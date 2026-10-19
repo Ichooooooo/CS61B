@@ -1,0 +1,35 @@
+# wug2.txt deliberately has no final newline. Conflict markers are
+# concatenated directly with the original bytes, without adding a newline.
+I definitions.inc
+> init
+<<<
++ wug.txt wug.txt
+> add wug.txt
+<<<
+> commit "base"
+<<<
+> branch dev
+<<<
++ wug.txt notwug.txt
+> add wug.txt
+<<<
+> commit "master version"
+<<<
+> checkout dev
+<<<
++ wug.txt wug2.txt
+> add wug.txt
+<<<
+> commit "dev without final newline"
+<<<
+> checkout master
+<<<
+> merge dev
+Encountered a merge conflict.
+<<<
+= wug.txt conflict-no-final-newline.txt
+* .gitlet/Stage/Addition/wug.txt
+- wug.txt
+> checkout -- wug.txt
+<<<
+= wug.txt conflict-no-final-newline.txt

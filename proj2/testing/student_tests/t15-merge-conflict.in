@@ -1,0 +1,62 @@
+# both sides modify the same file -> conflict file, and a merge commit is
+# still created
+I definitions.inc
+> init
+<<<
++ wug.txt wug.txt
+> add wug.txt
+<<<
+> commit "base"
+<<<
+> branch dev
+<<<
+> checkout dev
+<<<
++ wug.txt dev-wug.txt
+> add wug.txt
+<<<
+> commit "dev version"
+<<<
+> checkout master
+<<<
++ wug.txt notwug.txt
+> add wug.txt
+<<<
+> commit "master version"
+<<<
+> merge dev
+Encountered a merge conflict.
+<<<
+= wug.txt conflict-wug.txt
+> status
+=== Branches ===
+dev
+*master
+
+=== Staged Files ===
+
+=== Removed Files ===
+
+=== Modifications Not Staged For Commit ===
+
+=== Untracked Files ===
+
+<<<
+> log
+===
+${COMMIT_HEAD}
+Merged dev into master.
+
+===
+${COMMIT_HEAD}
+master version
+
+===
+${COMMIT_HEAD}
+base
+
+===
+${COMMIT_HEAD}
+initial commit
+
+<<<*

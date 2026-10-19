@@ -1,0 +1,32 @@
+# checkout -- file restores the HEAD version (not the index version)
+# and does not touch the staging area
+I definitions.inc
+> init
+<<<
++ wug.txt wug.txt
+> add wug.txt
+<<<
+> commit "v1"
+<<<
++ wug.txt notwug.txt
+> add wug.txt
+<<<
+> commit "v2"
+<<<
++ wug.txt wug.txt
+> checkout -- wug.txt
+<<<
+= wug.txt notwug.txt
+> status
+=== Branches ===
+*master
+
+=== Staged Files ===
+
+=== Removed Files ===
+
+=== Modifications Not Staged For Commit ===
+
+=== Untracked Files ===
+
+<<<

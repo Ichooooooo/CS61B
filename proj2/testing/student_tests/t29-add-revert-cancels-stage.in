@@ -1,0 +1,43 @@
+# Reverting a previously staged modification to HEAD and adding again
+# must cancel staging, rather than create an unchanged commit.
+I definitions.inc
+> init
+<<<
++ wug.txt wug.txt
+> add wug.txt
+<<<
+> commit "base"
+<<<
++ wug.txt notwug.txt
+> add wug.txt
+<<<
+E .gitlet/Stage/Addition/wug.txt
++ wug.txt wug.txt
+> add wug.txt
+<<<
+* .gitlet/Stage/Addition/wug.txt
+> commit "should not exist"
+No changes added to the commit.
+<<<
+# Also cancel a removal when the original content is restored.
+> rm wug.txt
+<<<
+E .gitlet/Stage/Remove/wug.txt
++ wug.txt wug.txt
+> add wug.txt
+<<<
+* .gitlet/Stage/Remove/wug.txt
+* .gitlet/Stage/Addition/wug.txt
+> commit "also should not exist"
+No changes added to the commit.
+<<<
+> log
+===
+${COMMIT_HEAD}
+base
+
+===
+${COMMIT_HEAD}
+initial commit
+
+<<<*

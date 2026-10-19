@@ -1,0 +1,64 @@
+# non-conflicting merge: both sides changed different files
+I definitions.inc
+> init
+<<<
++ wug.txt wug.txt
++ nota.txt nota.txt
+> add wug.txt
+<<<
+> add nota.txt
+<<<
+> commit "base"
+<<<
+> branch dev
+<<<
+> checkout dev
+<<<
++ wug.txt notwug.txt
+> add wug.txt
+<<<
+> commit "dev changes wug"
+<<<
+> checkout master
+<<<
++ nota.txt notf.txt
+> add nota.txt
+<<<
+> commit "master changes nota"
+<<<
+> merge dev
+<<<
+= wug.txt notwug.txt
+= nota.txt notf.txt
+> status
+=== Branches ===
+dev
+*master
+
+=== Staged Files ===
+
+=== Removed Files ===
+
+=== Modifications Not Staged For Commit ===
+
+=== Untracked Files ===
+
+<<<
+> log
+===
+${COMMIT_HEAD}
+Merged dev into master.
+
+===
+${COMMIT_HEAD}
+master changes nota
+
+===
+${COMMIT_HEAD}
+base
+
+===
+${COMMIT_HEAD}
+initial commit
+
+<<<*

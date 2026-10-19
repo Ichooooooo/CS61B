@@ -1,0 +1,33 @@
+# Historical file checkout must preserve an already staged, different version.
+I definitions.inc
+> init
+<<<
++ wug.txt wug.txt
+> add wug.txt
+<<<
+> commit "base"
+<<<
+> find "base"
+([a-f0-9]{40})
+<<<*
+D BASE "${1}"
++ wug.txt notwug.txt
+> add wug.txt
+<<<
+> commit "head version"
+<<<
++ wug.txt dev-wug.txt
+> add wug.txt
+<<<
+> checkout ${BASE} -- wug.txt
+<<<
+= wug.txt wug.txt
+= .gitlet/Stage/Addition/wug.txt dev-wug.txt
+> commit "commit staged version"
+<<<
+# Commit consumes the staged version without overwriting the worktree.
+= wug.txt wug.txt
+* .gitlet/Stage/Addition/wug.txt
+> checkout -- wug.txt
+<<<
+= wug.txt dev-wug.txt

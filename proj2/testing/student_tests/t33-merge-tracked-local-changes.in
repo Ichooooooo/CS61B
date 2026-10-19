@@ -1,0 +1,54 @@
+# Characterization test: a tracked file's unstaged edit can be overwritten
+# by merge. This records current behavior, not a data-safety guarantee.
+# Untracked-file protection is checked separately in t30.
+I definitions.inc
+> init
+<<<
++ wug.txt wug.txt
+> add wug.txt
+<<<
+> commit "base"
+<<<
+> branch dev
+<<<
++ a.txt a.txt
+> add a.txt
+<<<
+> commit "master independent change"
+<<<
+> checkout dev
+<<<
++ wug.txt notwug.txt
+> add wug.txt
+<<<
+> commit "dev changes wug"
+<<<
+> checkout master
+<<<
++ wug.txt dev-wug.txt
+> merge dev
+<<<
+= wug.txt notwug.txt
+= a.txt a.txt
+* .gitlet/Stage/Addition/wug.txt
+# Confirm that merge completed and committed the incoming file version.
+> log
+===
+commit [a-f0-9]{40}
+Merge: [a-f0-9]{7} [a-f0-9]{7}
+${DATE}
+Merged dev into master.
+
+===
+${COMMIT_HEAD}
+master independent change
+
+===
+${COMMIT_HEAD}
+base
+
+===
+${COMMIT_HEAD}
+initial commit
+
+<<<*

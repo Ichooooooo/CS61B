@@ -805,7 +805,8 @@ public class Repository {
         } else {
             targetCommitFile = findCommitWithId(commitId);
         }
-        if (!targetCommitFile.exists()) {
+        // Notice that if using findCommitWithId may return null
+        if (targetCommitFile == null || !targetCommitFile.exists()) {
             System.out.println("No commit with that id exists.");
             System.exit(0);
         }

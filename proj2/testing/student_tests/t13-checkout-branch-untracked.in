@@ -1,0 +1,24 @@
+# checkout <branch> refuses to overwrite an untracked file
+I definitions.inc
+> init
+<<<
++ wug.txt wug.txt
+> add wug.txt
+<<<
+> commit "v1"
+<<<
+> branch dev
+<<<
+> checkout dev
+<<<
++ nota.txt nota.txt
+> add nota.txt
+<<<
+> commit "dev adds nota"
+<<<
+> checkout master
+<<<
++ nota.txt notf.txt
+> checkout dev
+There is an untracked file in the way; delete it, or add and commit it first.
+<<<

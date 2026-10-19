@@ -67,7 +67,7 @@ Name：icovo
    merge commit 的第二个父 commit 的 SHA-1。对于普通 commit，该值为 `null`。
 
 6. `SHA1`  
-   一个 transient 字段，用于表示 commit ID。实际实现中，`getSHA1()` 会序列化 commit 对象，并对序列化结果计算 SHA-1。
+   一个未使用的 transient 字段，不参与序列化。当前实现不缓存 commit ID；每次调用 `getSHA1()`，都会先序列化 commit 对象，再对得到的字节计算 SHA-1 并返回。
 
 ### Branch
 

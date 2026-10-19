@@ -1,0 +1,28 @@
+# current branch deleted, given branch modified -> conflict with one empty side
+I definitions.inc
+> init
+<<<
++ wug.txt wug.txt
+> add wug.txt
+<<<
+> commit "base"
+<<<
+> branch dev
+<<<
+> checkout dev
+<<<
++ wug.txt dev-wug.txt
+> add wug.txt
+<<<
+> commit "dev modifies wug"
+<<<
+> checkout master
+<<<
+> rm wug.txt
+<<<
+> commit "master deletes wug"
+<<<
+> merge dev
+Encountered a merge conflict.
+<<<
+= wug.txt conflict-head-deleted.txt

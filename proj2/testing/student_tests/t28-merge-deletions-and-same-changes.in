@@ -1,0 +1,73 @@
+# Cover delete/same, delete/delete, same/delete, same/same,
+# change/same, and change/change with identical resulting contents.
+I definitions.inc
+> init
+<<<
++ a.txt a.txt
++ b.txt b.txt
++ c.txt c.txt
++ d.txt d.txt
++ e.txt e.txt
++ f.txt wug.txt
+> add a.txt
+<<<
+> add b.txt
+<<<
+> add c.txt
+<<<
+> add d.txt
+<<<
+> add e.txt
+<<<
+> add f.txt
+<<<
+> commit "base"
+<<<
+> branch dev
+<<<
+> rm a.txt
+<<<
+> rm b.txt
+<<<
++ c.txt nota.txt
++ f.txt notwug.txt
+> add c.txt
+<<<
+> add f.txt
+<<<
+> commit "master changes"
+<<<
+> checkout dev
+<<<
+> rm b.txt
+<<<
+> rm d.txt
+<<<
++ c.txt nota.txt
+> add c.txt
+<<<
+> commit "dev changes"
+<<<
+> checkout master
+<<<
+> merge dev
+<<<
+* a.txt
+* b.txt
+* d.txt
+= c.txt nota.txt
+= e.txt e.txt
+= f.txt notwug.txt
+* .gitlet/Stage/Remove/d.txt
+> checkout -- d.txt
+File does not exist in that commit.
+<<<
+# Unchanged and locally changed files must survive the resulting snapshot.
+- e.txt
+- f.txt
+> checkout -- e.txt
+<<<
+> checkout -- f.txt
+<<<
+= e.txt e.txt
+= f.txt notwug.txt

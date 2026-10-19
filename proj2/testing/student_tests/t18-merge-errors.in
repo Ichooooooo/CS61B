@@ -1,0 +1,28 @@
+# merge guards
+I definitions.inc
+> init
+<<<
++ wug.txt wug.txt
+> add wug.txt
+<<<
+> commit "base"
+<<<
+> branch dev
+<<<
+> merge master
+Cannot merge a branch with itself.
+<<<
+> merge nope
+A branch with that name does not exist.
+<<<
++ nota.txt nota.txt
+> add nota.txt
+<<<
+> merge dev
+You have uncommitted changes.
+<<<
+> commit "add nota"
+<<<
+> merge dev
+Given branch is an ancestor of the current branch.
+<<<

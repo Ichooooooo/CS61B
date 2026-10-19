@@ -1,0 +1,59 @@
+# reset moves the current branch, rewrites the worktree and clears the stage
+I definitions.inc
+> init
+<<<
++ wug.txt wug.txt
+> add wug.txt
+<<<
+> commit "v1"
+<<<
++ nota.txt nota.txt
+> add nota.txt
+<<<
+> commit "v2"
+<<<
+> log
+===
+${COMMIT_HEAD}
+v2
+
+===
+${COMMIT_HEAD}
+v1
+
+===
+${COMMIT_HEAD}
+initial commit
+
+<<<*
+D V1 "${2}"
+> reset ${V1}
+<<<
+= wug.txt wug.txt
+* nota.txt
+> status
+=== Branches ===
+*master
+
+=== Staged Files ===
+
+=== Removed Files ===
+
+=== Modifications Not Staged For Commit ===
+
+=== Untracked Files ===
+
+<<<
+> log
+===
+${COMMIT_HEAD}
+v1
+
+===
+${COMMIT_HEAD}
+initial commit
+
+<<<*
+> reset 0000000000000000000000000000000000000000
+No commit with that id exists.
+<<<

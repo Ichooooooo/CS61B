@@ -1,0 +1,44 @@
+# branch creation/duplication errors and rm-branch guards
+I definitions.inc
+> init
+<<<
+> branch dev
+<<<
+> branch dev
+A branch with that name already exists.
+<<<
+> status
+=== Branches ===
+dev
+*master
+
+=== Staged Files ===
+
+=== Removed Files ===
+
+=== Modifications Not Staged For Commit ===
+
+=== Untracked Files ===
+
+<<<
+> rm-branch master
+Cannot remove the current branch.
+<<<
+> rm-branch nope
+A branch with that name does not exist.
+<<<
+> rm-branch dev
+<<<
+> status
+=== Branches ===
+*master
+
+=== Staged Files ===
+
+=== Removed Files ===
+
+=== Modifications Not Staged For Commit ===
+
+=== Untracked Files ===
+
+<<<

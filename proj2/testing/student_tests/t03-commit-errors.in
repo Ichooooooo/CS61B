@@ -1,0 +1,15 @@
+# empty message, empty stage, unchanged re-add
+I definitions.inc
+> init
+<<<
++ wug.txt wug.txt
+> add wug.txt
+<<<
+> commit ""
+Please enter a commit message.
+<<<
+> commit "v1"
+<<<
+> commit "v2"
+No changes added to the commit.
+<<<

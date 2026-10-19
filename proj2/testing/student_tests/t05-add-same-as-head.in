@@ -1,0 +1,16 @@
+# adding a file identical to HEAD clears the staging entry
+I definitions.inc
+> init
+<<<
++ wug.txt wug.txt
+> add wug.txt
+<<<
+> commit "v1"
+<<<
++ wug.txt wug.txt
+> add wug.txt
+<<<
+* .gitlet/Stage/Addition/wug.txt
+> commit "nothing"
+No changes added to the commit.
+<<<

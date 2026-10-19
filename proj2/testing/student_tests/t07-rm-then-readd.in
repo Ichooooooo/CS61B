@@ -1,0 +1,34 @@
+# after rm, re-adding different content must move the filename from
+# Stage/Remove to Stage/Addition
+I definitions.inc
+> init
+<<<
++ wug.txt wug.txt
+> add wug.txt
+<<<
+> commit "v1"
+<<<
+> rm wug.txt
+<<<
+> add wug.txt
+File does not exist.
+<<<
++ wug.txt notwug.txt
+> add wug.txt
+<<<
+* .gitlet/Stage/Remove/wug.txt
+E .gitlet/Stage/Addition/wug.txt
+> status
+=== Branches ===
+*master
+
+=== Staged Files ===
+wug.txt
+
+=== Removed Files ===
+
+=== Modifications Not Staged For Commit ===
+
+=== Untracked Files ===
+
+<<<

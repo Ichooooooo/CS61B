@@ -1,0 +1,43 @@
+# checkout <commit> -- file with full IDs, plus error messages.
+# Actual abbreviated-ID coverage is in t22-checkout-abbreviated-id.in.
+I definitions.inc
+> init
+<<<
++ wug.txt wug.txt
+> add wug.txt
+<<<
+> commit "v1"
+<<<
++ wug.txt notwug.txt
+> add wug.txt
+<<<
+> commit "v2"
+<<<
+> log
+===
+${COMMIT_HEAD}
+v2
+
+===
+${COMMIT_HEAD}
+v1
+
+===
+${COMMIT_HEAD}
+initial commit
+
+<<<*
+D V2 "${1}"
+D V1 "${2}"
+> checkout ${V1} -- wug.txt
+<<<
+= wug.txt wug.txt
+> checkout ${V2} -- wug.txt
+<<<
+= wug.txt notwug.txt
+> checkout -- nota.txt
+File does not exist in that commit.
+<<<
+> checkout 0000000000000000000000000000000000000000 -- wug.txt
+No commit with that id exists.
+<<<

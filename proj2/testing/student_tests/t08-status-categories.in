@@ -1,0 +1,31 @@
+# status separates modified / deleted / untracked
+I definitions.inc
+> init
+<<<
++ wug.txt wug.txt
++ nota.txt nota.txt
+> add wug.txt
+<<<
+> add nota.txt
+<<<
+> commit "base"
+<<<
++ wug.txt notwug.txt
+- nota.txt
++ notf.txt notf.txt
+> status
+=== Branches ===
+*master
+
+=== Staged Files ===
+
+=== Removed Files ===
+
+=== Modifications Not Staged For Commit ===
+nota.txt (deleted)
+wug.txt (modified)
+
+=== Untracked Files ===
+notf.txt
+
+<<<

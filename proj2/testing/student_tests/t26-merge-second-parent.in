@@ -1,0 +1,79 @@
+# Merge twice. For the second merge, dev's earlier commit is a common
+# ancestor reachable only through master's merge commit's second parent.
+# Using only first parents would choose base and report a false conflict.
+I definitions.inc
+> init
+<<<
++ wug.txt wug.txt
+> add wug.txt
+<<<
+> commit "base"
+<<<
+> branch dev
+<<<
++ a.txt a.txt
+> add a.txt
+<<<
+> commit "master independent change"
+<<<
+> checkout dev
+<<<
++ wug.txt notwug.txt
+> add wug.txt
+<<<
+> commit "dev first change"
+<<<
+> checkout master
+<<<
+> merge dev
+<<<
+= wug.txt notwug.txt
+= a.txt a.txt
++ wug.txt dev-wug.txt
+> add wug.txt
+<<<
+> commit "master after first merge"
+<<<
+> find "master after first merge"
+([a-f0-9]{7})[a-f0-9]{33}
+<<<*
+D MASTER_PARENT "${1}"
+> checkout dev
+<<<
++ b.txt b.txt
+> add b.txt
+<<<
+> commit "dev second change"
+<<<
+> find "dev second change"
+([a-f0-9]{7})[a-f0-9]{33}
+<<<*
+D DEV_PARENT "${1}"
+> checkout master
+<<<
+> merge dev
+<<<
+= wug.txt dev-wug.txt
+= a.txt a.txt
+= b.txt b.txt
+# Require the merge header, including both parent IDs in order.
+> log
+===
+commit [a-f0-9]{40}
+Merge: ${MASTER_PARENT} ${DEV_PARENT}
+${DATE}
+Merged dev into master.
+
+${ARBLINES}
+<<<*
+# The source branch must retain its original snapshot.
+> checkout dev
+<<<
+= wug.txt notwug.txt
+= b.txt b.txt
+* a.txt
+> checkout master
+<<<
+= wug.txt dev-wug.txt
+= a.txt a.txt
+= b.txt b.txt

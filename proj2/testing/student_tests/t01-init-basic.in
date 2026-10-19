@@ -1,0 +1,11 @@
+# init creates .gitlet; second init is rejected
+I definitions.inc
+> init
+<<<
+E .gitlet
+E .gitlet/HEAD
+E .gitlet/Branch/master
+E .gitlet/Commit
+> init
+A Gitlet version-control system already exists in the current directory.
+<<<
